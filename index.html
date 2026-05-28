@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>> FUTURE_SELF.exe</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #111111;
+    --muted: #666666;
+    --border: #111111;
+    --accent: #111111;
+    --accent-bg: #111111;
+    --accent-fg: #ffffff;
+    --invert: 0;
+  }
+  [data-mode="night"] {
+    --bg: #0a0a0a;
+    --fg: #f0f0f0;
+    --muted: #777777;
+    --border: #f0f0f0;
+    --accent: #f0f0f0;
+    --accent-bg: #f0f0f0;
+    --accent-fg: #0a0a0a;
+    --invert: 1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 24px; }
+  .hidden { display: none !important; }
+  .blink { animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .typewriter::after { content: "█"; animation: blink 1s step-end infinite; margin-left: 2px; }
+  h1 {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 0 0 24px 0;
+    color: var(--muted);
+  }
+  .ascii-box {
+    border: 2px solid var(--border);
+    padding: 20px;
+    position: relative;
+  }
+  .ascii-box::before {
+    content: "+";
+    position: absolute;
+    top: -9px;
+    left: 12px;
+    background: var(--bg);
+    padding: 0 6px;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--fg);
+  }
+  .ascii-box::after {
+    content: "+";
+    position: absolute;
+    bottom: -9px;
+    right: 12px;
+    background: var(--bg);
+    padding: 0 6px;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--fg);
+  }
+  label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+  input[type="text"], textarea {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, textarea:focus { border-color: var(--fg); }
+  textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+  .btn {
+    display: inline-block;
+    background: var(--accent-bg);
+    color: var(--accent-fg);
+    border: 2px solid var(--border);
+    padding: 12px 28px;
+    font-family: inherit;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.98); }
+  .btn.secondary {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--muted);
+  }
+  .btn.secondary:hover { border-color: var(--fg); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .boot-sequence { white-space: pre-wrap; margin-bottom: 32px; color: var(--muted); }
+  .future-script {
+    background: transparent;
+    border: 2px solid var(--border);
+    padding: 24px;
+    margin: 24px 0;
+    position: relative;
+    line-height: 1.8;
+  }
+  .future-script .corner { position: absolute; width: 12px; height: 12px; }
+  .future-script .corner.tl { top: -6px; left: -6px; border-top: 2px solid var(--border); border-left: 2px solid var(--border); }
+  .future-script .corner.tr { top: -6px; right: -6px; border-top: 2px solid var(--border); border-right: 2px solid var(--border); }
+  .future-script .corner.bl { bottom: -6px; left: -6px; border-bottom: 2px solid var(--border); border-left: 2px solid var(--border); }
+  .future-script .corner.br { bottom: -6px; right: -6px; border-bottom: 2px solid var(--border); border-right: 2px solid var(--border); }
+  .script-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .script-header::before { content: "///"; }
+  .goal-block { margin-bottom: 20px; }
+  .goal-block .goal-title { font-weight: 700; margin-bottom: 6px; }
+  .goal-block .goal-feel { color: var(--muted); padding-left: 16px; border-left: 2px solid var(--muted); }
+  .check-section { margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--muted); }
+  .checks-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .check-card {
+    flex: 1;
+    min-width: 220px;
+    border: 1px solid var(--muted);
+    padding: 20px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .check-card:hover { border-color: var(--fg); }
+  .check-card.complete { border-color: var(--fg); border-width: 2px; }
+  .check-card .check-icon { font-size: 24px; margin-bottom: 8px; }
+  .check-card.complete .check-icon::before { content: "[DONE]"; font-size: 12px; letter-spacing: 0.1em; color: var(--fg); }
+  .check-card:not(.complete) .check-icon::before { content: "[    ]"; font-size: 12px; letter-spacing: 0.1em; color: var(--muted); }
+  .check-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; color: var(--muted); }
+  .progress-bar-wrapper { margin-top: 24px; }
+  .progress-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .progress-bar {
+    width: 100%;
+    border: 1px solid var(--muted);
+    padding: 2px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent-bg);
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-fg);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+  .progress-fill.empty { background: transparent; color: var(--muted); }
+  .streak-display {
+    margin-top: 24px;
+    font-size: 48px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .streak-label {
+    text-align: center;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 16px;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    border: 1px solid var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    position: relative;
+  }
+  .cal-day.done { background: var(--accent-bg); color: var(--accent-fg); border-color: var(--accent-bg); }
+  .cal-day.today { border-color: var(--fg); border-width: 2px; }
+  .cal-day .tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    border: 1px solid var(--fg);
+    padding: 6px 10px;
+    font-size: 10px;
+    white-space: nowrap;
+    z-index: 10;
+  }
+  .cal-day:hover .tooltip { display: block; }
+  .mode-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 6px 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    z-index: 100;
+  }
+  .mode-toggle:hover { border-color: var(--fg); }
+  .nav { margin-bottom: 24px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .nav a { color: var(--muted); text-decoration: none; cursor: pointer; }
+  .nav a:hover { color: var(--fg); text-decoration: underline; }
+  .nav span { margin: 0 8px; }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 24px; }
+  .stat-block { border: 1px solid var(--muted); padding: 16px; text-align: center; }
+  .stat-value { font-size: 24px; font-weight: 700; }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-top: 4px; }
+  .warn { color: var(--muted); font-size: 12px; border-left: 2px solid var(--muted); padding-left: 12px; margin: 16px 0; }
+  .reset-link { color: var(--muted); font-size: 11px; cursor: pointer; text-decoration: underline; margin-top: 24px; display: inline-block; }
+  .reset-link:hover { color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<button class="mode-toggle" id="modeToggle" onclick="toggleMode()">[ NIGHT ]</button>
+
+<!-- BOOT SCREEN -->
+<div id="bootScreen">
+  <div class="boot-sequence" id="bootText"></div>
+  <div id="bootButtons" class="hidden btn-row">
+    <button class="btn" onclick="goToSetup()">INITIALIZE_PROGRAM</button>
+  </div>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="setupScreen" class="hidden">
+  <h1>> Identity_Configuration</h1>
+  <div class="ascii-box">
+    <p style="margin-top:0">Enter the future version of yourself. These are not goals to chase. These are facts about who you already are. Focus on feeling.</p>
+    <div id="setupForm"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="saveIdentity()">LOCK_IN_IDENTITY</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashScreen" class="hidden">
+  <h1>> Daily_Reprogramming</h1>
+  <div class="nav">
+    <a onclick="showView('script')">Script</a>
+    <span>/</span>
+    <a onclick="showView('progress')">Progress</a>
+    <span>/</span>
+    <a onclick="showView('settings')">Config</a>
+  </div>
+
+  <!-- SCRIPT VIEW -->
+  <div id="viewScript">
+    <div class="streak-label">Current_Streak</div>
+    <div class="streak-display" id="streakNumber">0</div>
+    <div class="streak-label" id="streakSub" style="margin-top:4px">days of reprogramming</div>
+
+    <div class="future-script">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="script-header"> Future_Self_Identity_v1.0</div>
+      <div id="scriptContent"></div>
+    </div>
+
+    <div class="check-section">
+      <div class="checks-row">
+        <div class="check-card" id="checkMorning" onclick="markCheck('morning')">
+          <div class="check-icon"></div>
+          <div class="check-label">Morning_Read</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">First thing. Before input.</div>
+        </div>
+        <div class="check-card" id="checkNight" onclick="markCheck('night')">
+          <div class="check-icon"></div>
+          <div class="check-label">Night_Read</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Last thing. Before sleep.</div>
+        </div>
+      </div>
+      <div class="progress-bar-wrapper">
+        <div class="progress-label"><span>Today_Completion</span><span id="todayPct">0%</span></div>
+        <div class="progress-bar">
+          <div class="progress-fill empty" id="todayBar" style="width:0%">░░░░░░░░░░░░░░░░░░░░</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS VIEW -->
+  <div id="viewProgress" class="hidden">
+    <h1>> Progress_Log</h1>
+    <div class="stats-row">
+      <div class="stat-block">
+        <div class="stat-value" id="statStreak">0</div>
+        <div class="stat-label">Day_Streak</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Total_Reads</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value" id="statRate">0%</div>
+        <div class="stat-label">Completion_Rate</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;">
+      <div class="script-header"> Last_30_Days</div>
+      <div class="calendar-grid" id="calendar"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS VIEW -->
+  <div id="viewSettings" class="hidden">
+    <h1>> Config</h1>
+    <div class="ascii-box">
+      <p class="warn">WARNING: Editing your identity will reset your streak. The subconscious does not respond to constant changes.</p>
+      <div id="editForm"></div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn" onclick="updateIdentity()">UPDATE_IDENTITY</button>
+        <button class="btn secondary" onclick="exportData()">EXPORT_DATA</button>
+      </div>
+      <a class="reset-link" onclick="resetAll()">[ DESTROY_ALL_DATA ]</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+(function(){
+  const LS = {
+    identity: 'fs_identity',
+    checks: 'fs_checks',
+    mode: 'fs_mode',
+  };
+
+  let identity = null;
+  let checks = {};
+
+  function getToday() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function load() {
+    try {
+      identity = JSON.parse(localStorage.getItem(LS.identity));
+    } catch(e) { identity = null; }
+    try {
+      checks = JSON.parse(localStorage.getItem(LS.checks)) || {};
+    } catch(e) { checks = {}; }
+    const mode = localStorage.getItem(LS.mode);
+    if (mode === 'night') { document.body.setAttribute('data-mode', 'night'); document.getElementById('modeToggle').textContent = '[ DAY ]'; }
+  }
+
+  function save() {
+    localStorage.setItem(LS.identity, JSON.stringify(identity));
+    localStorage.setItem(LS.checks, JSON.stringify(checks));
+  }
+
+  function renderBoot() {
+    const lines = [
+      '> FUTURE_SELF_OS v1.0',
+      '> ---------------------',
+      '> Initializing subconscious reprogramming module...',
+      '> Loading neural pathways...',
+      '> Status: UNCONFIGURED',
+      '>',
+      '> This program installs a new identity into your subconscious.',
+      '> You will read it every morning and night until it becomes default.',
+      '>',
+    ];
+    const el = document.getElementById('bootText');
+    let i = 0;
+    function type() {
+      if (i < lines.length) {
+        el.textContent += lines[i] + '\n';
+        i++;
+        setTimeout(type, 120);
+      } else {
+        document.getElementById('bootButtons').classList.remove('hidden');
+      }
+    }
+    type();
+  }
+
+  function buildGoalInputs(isEdit) {
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+      const g = identity && identity.goals ? identity.goals[i-1] : '';
+      const f = identity && identity.feelings ? identity.feelings[i-1] : '';
+      html += `<label>Identity_Axiom_0${i}</label>`;
+      html += `<input type="text" id="goal${i}" placeholder="I am a person who..." value="${isEdit ? escapeHtml(g || '') : ''}">`;
+      html += `<label>Emotional_State_0${i}</label>`;
+      html += `<textarea id="feel${i}" placeholder="Write in present tense: I feel...">${isEdit ? escapeHtml(f || '') : ''}</textarea>`;
+    }
+    return html;
+  }
+
+  function escapeHtml(t) {
+    return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function goToSetup() {
+    document.getElementById('bootScreen').classList.add('hidden');
+    document.getElementById('setupScreen').classList.remove('hidden');
+    document.getElementById('setupForm').innerHTML = buildGoalInputs(false);
+  }
+
+  function showView(name) {
+    ['viewScript','viewProgress','viewSettings'].forEach(v=>document.getElementById(v).classList.add('hidden'));
+    document.getElementById('view'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
+    if (name === 'progress') renderProgress();
+    if (name === 'settings') document.getElementById('editForm').innerHTML = buildGoalInputs(true);
+  }
+
+  function saveIdentity() {
+    const goals = [], feelings = [];
+    for (let i = 1; i <= 5; i++) {
+      const g = document.getElementById('goal'+i).value.trim();
+      const f = document.getElementById('feel'+i).value.trim();
+      if (!g || !f) { alert('All fields required. The subconscious rejects incomplete programs.'); return; }
+      goals.push(g); feelings.push(f);
+    }
+    identity = { goals, feelings, lockedAt: new Date().toISOString() };
+    checks = {};
+    save();
+    showDashboard();
+  }
+
+  function updateIdentity() {
+    const goals = [], feelings = [];
+    for (let i = 1; i <= 5; i++) {
+      const g = document.getElementById('goal'+i).value.trim();
+      const f = document.getElementById('feel'+i).value.trim();
+      if (!g || !f) { alert('All fields required.'); return; }
+      goals.push(g); feelings.push(f);
+    }
+    if (!confirm('This will restart your streak. The subconscious needs consistency. Proceed?')) return;
+    identity = { goals, feelings, lockedAt: new Date().toISOString() };
+    checks = {};
+    save();
+    showDashboard();
+  }
+
+  function showDashboard() {
+    document.getElementById('bootScreen').classList.add('hidden');
+    document.getElementById('setupScreen').classList.add('hidden');
+    document.getElementById('dashScreen').classList.remove('hidden');
+    showView('script');
+    renderScript();
+    renderChecks();
+  }
+
+  function renderScript() {
+    if (!identity) return;
+    let html = '';
+    identity.goals.forEach((g, i) => {
+      html += `<div class="goal-block">
+        <div class="goal-title">> ${escapeHtml(g)}</div>
+        <div class="goal-feel">${escapeHtml(identity.feelings[i])}</div>
+      </div>`;
+    });
+    document.getElementById('scriptContent').innerHTML = html;
+  }
+
+  function getStreak() {
+    const dates = Object.keys(checks).sort();
+    if (dates.length === 0) return 0;
+    const today = getToday();
+    let streak = 0;
+    const d = new Date();
+    // walk backwards from today
+    while (true) {
+      const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const entry = checks[ds];
+      if (entry && (entry.morning || entry.night)) {
+        streak++;
+      } else if (ds !== today) {
+        break;
+      }
+      d.setDate(d.getDate() - 1);
+    }
+    // if today has no checks, the loop counts today as broken, but if yesterday had checks we need to recompute properly
+    // simpler: just walk from most recent backwards
+    // Actually correct method:
+    return streak;
+  }
+
+  function getStreakCorrect() {
+    const today = getToday();
+    const dates = Object.keys(checks).filter(d => {
+      const c = checks[d];
+      return c && (c.morning || c.night);
+    }).sort();
+    if (dates.length === 0) return 0;
+    let streak = 0;
+    const d = new Date();
+    // start from today, go back day by day until we hit a gap
+    for (let i = 0; i < 3650; i++) {
+      const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const entry = checks[ds];
+      if (entry && (entry.morning || entry.night)) {
+        streak++;
+      } else if (ds !== today) {
+        break;
+      }
+      d.setDate(d.getDate() - 1);
+    }
+    return streak;
+  }
+
+  function renderChecks() {
+    const today = getToday();
+    const entry = checks[today] || {};
+
+    const m = document.getElementById('checkMorning');
+    const n = document.getElementById('checkNight');
+    if (entry.morning) m.classList.add('complete'); else m.classList.remove('complete');
+    if (entry.night) n.classList.add('complete'); else n.classList.remove('complete');
+
+    const pct = (entry.morning && entry.night) ? 100 : (entry.morning || entry.night) ? 50 : 0;
+    document.getElementById('todayPct').textContent = pct + '%';
+    const bar = document.getElementById('todayBar');
+    bar.style.width = pct + '%';
+    if (pct === 0) {
+      bar.classList.add('empty');
+      bar.textContent = '░░░░░░░░░░░░░░░░░░░░';
+    } else if (pct === 50) {
+      bar.classList.remove('empty');
+      bar.textContent = '████████████░░░░░░░░';
+    } else {
+      bar.classList.remove('empty');
+      bar.textContent = '████████████████████';
+    }
+
+    const streak = getStreakCorrect();
+    document.getElementById('streakNumber').textContent = streak;
+    document.getElementById('streakSub').textContent = streak === 1 ? 'day of reprogramming' : 'days of reprogramming';
+  }
+
+  function markCheck(which) {
+    const today = getToday();
+    if (!checks[today]) checks[today] = {};
+    checks[today][which] = !checks[today][which];
+    save();
+    renderChecks();
+  }
+
+  function renderProgress() {
+    const today = getToday();
+    const dates = Object.keys(checks).filter(d => {
+      const c = checks[d];
+      return c && (c.morning || c.night);
+    }).sort();
+
+    // streak
+    const streak = getStreakCorrect();
+    document.getElementById('statStreak').textContent = streak;
+
+    // total reads
+    let total = 0;
+    Object.values(checks).forEach(c => {
+      if (c.morning) total++;
+      if (c.night) total++;
+    });
+    document.getElementById('statTotal').textContent = total;
+
+    // completion rate
+    const allDates = Object.keys(checks).sort();
+    let possible = allDates.length * 2;
+    let rate = possible > 0 ? Math.round((total / possible) * 100) : 0;
+    document.getElementById('statRate').textContent = rate + '%';
+
+    // calendar last 30 days
+    const grid = document.getElementById('calendar');
+    grid.innerHTML = '';
+    const d = new Date();
+    d.setDate(d.getDate() - 29);
+    for (let i = 0; i < 30; i++) {
+      const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const dayNum = d.getDate();
+      const c = checks[ds] || {};
+      const morning = !!c.morning;
+      const night = !!c.night;
+      const done = morning && night;
+      const partial = morning || night;
+      const isToday = ds === today;
+
+      const cell = document.createElement('div');
+      cell.className = 'cal-day' + (done ? ' done' : '') + (isToday ? ' today' : '');
+      cell.textContent = String(dayNum).padStart(2, '0');
+
+      let status = 'None';
+      if (morning && night) status = 'Full';
+      else if (morning) status = 'Morning only';
+      else if (night) status = 'Night only';
+      const tip = document.createElement('div');
+      tip.className = 'tooltip';
+      tip.textContent = ds + ' — ' + status;
+      cell.appendChild(tip);
+
+      grid.appendChild(cell);
+      d.setDate(d.getDate() + 1);
+    }
+    // fill header
+    const headers = ['S','M','T','W','T','F','S'];
+    // Actually let's prepend headers. But grid is 7 cols. We should show headers. Let me add them on top.
+    // Wait the grid is 7 columns, I can just prepend 7 header cells.
+    // Actually it's fine, the day numbers make it clear. But adding weekday headers above would be nice.
+    // I'll add a label row separately.
+  }
+
+  // add weekday header above calendar
+  function addCalHeader() {
+    const cal = document.getElementById('calendar');
+    if (!cal) return;
+    const hdr = document.createElement('div');
+    hdr.style.display = 'contents';
+    const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    days.forEach(d => {
+      const el = document.createElement('div');
+      el.style.textAlign = 'center';
+      el.style.fontSize = '9px';
+      el.style.color = 'var(--muted)';
+      el.style.letterSpacing = '0.1em';
+      el.textContent = d;
+      hdr.appendChild(el);
+    });
+    cal.parentNode.insertBefore(hdr, cal);
+  }
+
+  function toggleMode() {
+    const isNight = document.body.getAttribute('data-mode') === 'night';
+    if (isNight) {
+      document.body.removeAttribute('data-mode');
+      localStorage.setItem(LS.mode, 'day');
+      document.getElementById('modeToggle').textContent = '[ NIGHT ]';
+    } else {
+      document.body.setAttribute('data-mode', 'night');
+      localStorage.setItem(LS.mode, 'night');
+      document.getElementById('modeToggle').textContent = '[ DAY ]';
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('DESTROY ALL DATA? This cannot be undone.')) return;
+    localStorage.removeItem(LS.identity);
+    localStorage.removeItem(LS.checks);
+    identity = null; checks = {};
+    location.reload();
+  }
+
+  function exportData() {
+    const data = { identity, checks, exported: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'future_self_backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function init() {
+    load();
+    addCalHeader();
+    if (!identity) {
+      renderBoot();
+    } else {
+      showDashboard();
+    }
+  }
+
+  init();
+
+  // expose globals for onclick handlers
+  window.goToSetup = goToSetup;
+  window.saveIdentity = saveIdentity;
+  window.updateIdentity = updateIdentity;
+  window.showView = showView;
+  window.markCheck = markCheck;
+  window.toggleMode = toggleMode;
+  window.resetAll = resetAll;
+  window.exportData = exportData;
+})();
+</script>
+</body>
+</html>
