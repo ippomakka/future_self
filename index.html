@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>> FUTURE_SELF.exe</title>
 <style>
   :root {
@@ -10,51 +10,131 @@
     --fg: #111111;
     --muted: #666666;
     --border: #111111;
-    --accent: #111111;
-    --accent-bg: #111111;
+    ---accent-bg: #111111;
     --accent-fg: #ffffff;
-    --invert: 0;
   }
   [data-mode="night"] {
     --bg: #0a0a0a;
     --fg: #f0f0f0;
-    --muted: #777777;
-    --border: #f0f0f0;
-    --accent: #f0f0f0;
-    --accent-bg: #f0f0f0;
+    --muted: #888888;
+    --border: #444444;
+    ---accent-bg: #f0f0f0;
     --accent-fg: #0a0a0a;
-    --invert: 1;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body {
     background: var(--bg);
     color: var(--fg);
     font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
     min-height: 100vh;
     transition: background 0.3s, color 0.3s;
     -webkit-font-smoothing: antialiased;
+    padding-bottom: 80px;
   }
-  .container { max-width: 720px; margin: 0 auto; padding: 24px; }
+  .container { max-width: 680px; margin: 0 auto; padding: 16px; }
+  @media (min-width: 640px) { .container { padding: 24px; } }
   .hidden { display: none !important; }
-  .blink { animation: blink 1s step-end infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
-  .typewriter::after { content: "█"; animation: blink 1s step-end infinite; margin-left: 2px; }
   h1 {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 400;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    margin: 0 0 24px 0;
+    margin: 0 0 20px 0;
     color: var(--muted);
   }
+
+  /* ASCII Art blocks */
+  .ascii-art {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.3;
+    white-space: pre;
+    overflow-x: auto;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .ascii-divider {
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.2;
+    text-align: center;
+    margin: 24px 0;
+    letter-spacing: 0.2em;
+    opacity: 0.6;
+  }
+
+  /* Mode toggle */
+  .mode-toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 10px;
+    padding: 6px 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    z-index: 100;
+    touch-action: manipulation;
+    min-height: 40px;
+  }
+  @media (min-width: 640px) {
+    .mode-toggle { top: 16px; right: 16px; font-size: 11px; padding: 8px 14px; }
+  }
+  .mode-toggle:hover, .mode-toggle:active { border-color: var(--fg); }
+
+  /* Button styles */
+  .btn {
+    display: inline-block;
+    background: var(---accent-bg);
+    color: var(--accent-fg);
+    border: 2px solid var(--border);
+    padding: 14px 32px;
+    font-family: inherit;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+    touch-action: manipulation;
+    min-height: 48px;
+    width: 100%;
+    text-align: center;
+  }
+  @media (min-width: 640px) {
+    .btn { width: auto; }
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.98); }
+  .btn.secondary {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--muted);
+  }
+  .btn.secondary:hover { border-color: var(--fg); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn-row .btn { flex: 1; }
+  @media (min-width: 640px) {
+    .btn-row .btn { flex: 0 1 auto; }
+  }
+
+  /* Boot screen */
+  .boot-sequence { white-space: pre-wrap; margin-bottom: 28px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+  /* ASCII boxes */
   .ascii-box {
     border: 2px solid var(--border);
-    padding: 20px;
+    padding: 16px;
     position: relative;
   }
+  @media (min-width: 640px) { .ascii-box { padding: 20px; } }
   .ascii-box::before {
     content: "+";
     position: absolute;
@@ -77,60 +157,49 @@
     line-height: 1;
     color: var(--fg);
   }
-  label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
   input[type="text"], textarea {
     width: 100%;
     background: transparent;
     border: 1px solid var(--muted);
     color: var(--fg);
     font-family: inherit;
-    font-size: 14px;
-    padding: 10px 12px;
+    font-size: 16px;
+    padding: 12px 14px;
     margin-bottom: 20px;
     outline: none;
     transition: border-color 0.2s;
+    border-radius: 0;
+    -webkit-appearance: none;
   }
   input[type="text"]:focus, textarea:focus { border-color: var(--fg); }
-  textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
-  .btn {
-    display: inline-block;
-    background: var(--accent-bg);
-    color: var(--accent-fg);
-    border: 2px solid var(--border);
-    padding: 12px 28px;
-    font-family: inherit;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: transform 0.1s, opacity 0.2s;
-  }
-  .btn:hover { opacity: 0.85; }
-  .btn:active { transform: scale(0.98); }
-  .btn.secondary {
-    background: transparent;
-    color: var(--fg);
-    border: 1px solid var(--muted);
-  }
-  .btn.secondary:hover { border-color: var(--fg); }
-  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-  .boot-sequence { white-space: pre-wrap; margin-bottom: 32px; color: var(--muted); }
+  textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
+
+  /* Script card */
   .future-script {
     background: transparent;
     border: 2px solid var(--border);
-    padding: 24px;
-    margin: 24px 0;
+    padding: 16px;
+    margin: 20px 0;
     position: relative;
     line-height: 1.8;
   }
+  @media (min-width: 640px) { .future-script { padding: 24px; margin: 24px 0; } }
   .future-script .corner { position: absolute; width: 12px; height: 12px; }
   .future-script .corner.tl { top: -6px; left: -6px; border-top: 2px solid var(--border); border-left: 2px solid var(--border); }
   .future-script .corner.tr { top: -6px; right: -6px; border-top: 2px solid var(--border); border-right: 2px solid var(--border); }
   .future-script .corner.bl { bottom: -6px; left: -6px; border-bottom: 2px solid var(--border); border-left: 2px solid var(--border); }
   .future-script .corner.br { bottom: -6px; right: -6px; border-bottom: 2px solid var(--border); border-right: 2px solid var(--border); }
   .script-header {
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--muted);
@@ -140,67 +209,128 @@
     gap: 8px;
   }
   .script-header::before { content: "///"; }
-  .goal-block { margin-bottom: 20px; }
-  .goal-block .goal-title { font-weight: 700; margin-bottom: 6px; }
-  .goal-block .goal-feel { color: var(--muted); padding-left: 16px; border-left: 2px solid var(--muted); }
-  .check-section { margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--muted); }
-  .checks-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .goal-block { margin-bottom: 18px; }
+  .goal-block .goal-title { font-weight: 700; margin-bottom: 6px; word-break: break-word; }
+  .goal-block .goal-feel { color: var(--muted); padding-left: 12px; border-left: 2px solid var(--muted); word-break: break-word; }
+
+  /* Check section */
+  .check-section { margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--muted); }
+  @media (min-width: 640px) { .check-section { margin-top: 32px; padding-top: 24px; } }
+  .checks-row { display: flex; gap: 12px; flex-wrap: wrap; }
   .check-card {
     flex: 1;
-    min-width: 220px;
+    min-width: 0;
     border: 1px solid var(--muted);
-    padding: 20px;
+    padding: 16px;
     text-align: center;
     transition: border-color 0.2s;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
   }
+  @media (min-width: 640px) { .check-card { padding: 20px; min-width: 220px; } }
   .check-card:hover { border-color: var(--fg); }
   .check-card.complete { border-color: var(--fg); border-width: 2px; }
-  .check-card .check-icon { font-size: 24px; margin-bottom: 8px; }
-  .check-card.complete .check-icon::before { content: "[DONE]"; font-size: 12px; letter-spacing: 0.1em; color: var(--fg); }
-  .check-card:not(.complete) .check-icon::before { content: "[    ]"; font-size: 12px; letter-spacing: 0.1em; color: var(--muted); }
-  .check-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; color: var(--muted); }
-  .progress-bar-wrapper { margin-top: 24px; }
-  .progress-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .check-card .check-icon { font-size: 20px; margin-bottom: 8px; }
+  .check-card.complete .check-icon::before { content: "[DONE]"; font-size: 11px; letter-spacing: 0.1em; color: var(--fg); font-weight: 700; }
+  .check-card:not(.complete) .check-icon::before { content: "[    ]"; font-size: 11px; letter-spacing: 0.1em; color: var(--muted); }
+  .check-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; color: var(--muted); }
+  @media (min-width: 640px) { .check-label { font-size: 11px; } }
+
+  /* Progress bar - FIXED */
+  .progress-bar-wrapper { margin-top: 20px; }
+  @media (min-width: 640px) { .progress-bar-wrapper { margin-top: 24px; } }
+  .progress-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
   .progress-bar {
     width: 100%;
     border: 1px solid var(--muted);
-    padding: 2px;
-    height: 24px;
-    display: flex;
-    align-items: center;
+    height: 28px;
+    position: relative;
+    background: transparent;
+    overflow: hidden;
   }
   .progress-fill {
     height: 100%;
-    background: var(--accent-bg);
-    transition: width 0.5s ease;
+    background: var(---accent-bg);
+    transition: width 0.6s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    min-width: 0;
+  }
+  .progress-fill-text {
     color: var(--accent-fg);
     font-size: 10px;
     letter-spacing: 0.1em;
+    white-space: nowrap;
   }
-  .progress-fill.empty { background: transparent; color: var(--muted); }
+  .progress-empty {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    pointer-events: none;
+  }
+
+  /* Streak */
   .streak-display {
-    margin-top: 24px;
-    font-size: 48px;
+    margin-top: 20px;
+    font-size: 56px;
     font-weight: 700;
     text-align: center;
     letter-spacing: 0.05em;
+    line-height: 1;
   }
   .streak-label {
     text-align: center;
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--muted);
     margin-bottom: 4px;
   }
+
+  /* Stats */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 20px; }
+  @media (min-width: 640px) { .stats-row { gap: 12px; margin-top: 24px; } }
+  .stat-block { border: 1px solid var(--muted); padding: 14px 8px; text-align: center; }
+  @media (min-width: 640px) { .stat-block { padding: 16px; } }
+  .stat-value { font-size: 22px; font-weight: 700; }
+  @media (min-width: 640px) { .stat-value { font-size: 28px; } }
+  .stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-top: 4px; }
+  @media (min-width: 640px) { .stat-label { font-size: 10px; } }
+
+  /* Calendar */
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    margin-top: 16px;
+    gap: 3px;
+    margin-top: 12px;
+  }
+  @media (min-width: 640px) { .calendar-grid { gap: 4px; margin-top: 16px; } }
+  .cal-header {
+    text-align: center;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    padding: 4px 0;
   }
   .cal-day {
     aspect-ratio: 1;
@@ -208,10 +338,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 9px;
     position: relative;
   }
-  .cal-day.done { background: var(--accent-bg); color: var(--accent-fg); border-color: var(--accent-bg); }
+  @media (min-width: 640px) { .cal-day { font-size: 10px; } }
+  .cal-day.done { background: var(---accent-bg); color: var(--accent-fg); border-color: var(---accent-bg); }
+  .cal-day.partial { background: var(--bg); color: var(--fg); border: 1px dashed var(--muted); }
   .cal-day.today { border-color: var(--fg); border-width: 2px; }
   .cal-day .tooltip {
     display: none;
@@ -227,33 +359,81 @@
     z-index: 10;
   }
   .cal-day:hover .tooltip { display: block; }
-  .mode-toggle {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    background: transparent;
-    border: 1px solid var(--muted);
-    color: var(--fg);
-    font-family: inherit;
+
+  /* Navigation - desktop top, mobile bottom */
+  .nav {
+    margin-bottom: 20px;
     font-size: 11px;
-    padding: 6px 12px;
-    cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    z-index: 100;
+    color: var(--muted);
   }
-  .mode-toggle:hover { border-color: var(--fg); }
-  .nav { margin-bottom: 24px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
-  .nav a { color: var(--muted); text-decoration: none; cursor: pointer; }
+  .nav a { color: var(--muted); text-decoration: none; cursor: pointer; padding: 4px 0; }
   .nav a:hover { color: var(--fg); text-decoration: underline; }
   .nav span { margin: 0 8px; }
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 24px; }
-  .stat-block { border: 1px solid var(--muted); padding: 16px; text-align: center; }
-  .stat-value { font-size: 24px; font-weight: 700; }
-  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-top: 4px; }
+
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    z-index: 90;
+    padding: 0;
+  }
+  .mobile-nav .nav-btn {
+    flex: 1;
+    text-align: center;
+    padding: 14px 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    font-family: inherit;
+    touch-action: manipulation;
+    min-height: 56px;
+    transition: color 0.2s;
+  }
+  .mobile-nav .nav-btn:last-child { border-right: none; }
+  .mobile-nav .nav-btn.active { color: var(--fg); font-weight: 700; }
+  .mobile-nav .nav-btn:active { background: rgba(0,0,0,0.05); }
+  [data-mode="night"] .mobile-nav .nav-btn:active { background: rgba(255,255,255,0.05); }
+  @media (min-width: 640px) {
+    .mobile-nav { display: none !important; }
+    body { padding-bottom: 0; }
+  }
+  @media (max-width: 639px) {
+    .nav { display: none !important; }
+  }
+
+  /* Warning/Reset */
   .warn { color: var(--muted); font-size: 12px; border-left: 2px solid var(--muted); padding-left: 12px; margin: 16px 0; }
-  .reset-link { color: var(--muted); font-size: 11px; cursor: pointer; text-decoration: underline; margin-top: 24px; display: inline-block; }
+  .reset-link { color: var(--muted); font-size: 11px; cursor: pointer; text-decoration: underline; margin-top: 24px; display: inline-block; touch-action: manipulation; }
   .reset-link:hover { color: var(--fg); }
+
+  /* Ritual section */
+  .ritual-box {
+    border: 1px dashed var(--muted);
+    padding: 12px;
+    margin: 16px 0;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  @media (min-width: 640px) { .ritual-box { padding: 16px; } }
+
+  /* Animations */
+  @keyframes blink { 50% { opacity: 0; } }
+  .blink { animation: blink 1s step-end infinite; }
+  .fade-in { animation: fadeIn 0.4s ease forwards; opacity: 0; }
+  @keyframes fadeIn { to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -262,7 +442,8 @@
 <button class="mode-toggle" id="modeToggle" onclick="toggleMode()">[ NIGHT ]</button>
 
 <!-- BOOT SCREEN -->
-<div id="bootScreen">
+<div id="bootScreen" class="fade-in">
+  <div class="ascii-art" id="bootArt"></div>
   <div class="boot-sequence" id="bootText"></div>
   <div id="bootButtons" class="hidden btn-row">
     <button class="btn" onclick="goToSetup()">INITIALIZE_PROGRAM</button>
@@ -272,8 +453,13 @@
 <!-- SETUP SCREEN -->
 <div id="setupScreen" class="hidden">
   <h1>> Identity_Configuration</h1>
+  <div class="ascii-art" id="setupArt"></div>
   <div class="ascii-box">
-    <p style="margin-top:0">Enter the future version of yourself. These are not goals to chase. These are facts about who you already are. Focus on feeling.</p>
+    <p style="margin-top:0; font-size: 13px; line-height: 1.7;">
+      Enter the future version of yourself.<br>
+      These are not goals to chase. These are facts about who you already are.<br>
+      Write in present tense. Focus on feeling.
+    </p>
     <div id="setupForm"></div>
     <div class="btn-row">
       <button class="btn" onclick="saveIdentity()">LOCK_IN_IDENTITY</button>
@@ -298,11 +484,19 @@
     <div class="streak-display" id="streakNumber">0</div>
     <div class="streak-label" id="streakSub" style="margin-top:4px">days of reprogramming</div>
 
+    <div class="ascii-divider">---x---x---x---x---x---</div>
+
     <div class="future-script">
       <div class="corner tl"></div><div class="corner tr"></div>
       <div class="corner bl"></div><div class="corner br"></div>
       <div class="script-header"> Future_Self_Identity_v1.0</div>
       <div id="scriptContent"></div>
+    </div>
+
+    <div class="ritual-box">
+      <div id="ritualArt"></div>
+      Read this script every morning before input, every night before sleep.<br>
+      The subconscious learns through repetition and emotion.
     </div>
 
     <div class="check-section">
@@ -321,7 +515,10 @@
       <div class="progress-bar-wrapper">
         <div class="progress-label"><span>Today_Completion</span><span id="todayPct">0%</span></div>
         <div class="progress-bar">
-          <div class="progress-fill empty" id="todayBar" style="width:0%">░░░░░░░░░░░░░░░░░░░░</div>
+          <div class="progress-empty" id="progressEmpty">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</div>
+          <div class="progress-fill" id="todayBar" style="width:0%">
+            <span class="progress-fill-text" id="barLabel"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -345,8 +542,13 @@
       </div>
     </div>
 
-    <div style="margin-top:32px;">
+    <div style="margin-top:28px;">
       <div class="script-header"> Last_30_Days</div>
+      <div class="calendar-grid">
+        <div class="cal-header">SUN</div><div class="cal-header">MON</div><div class="cal-header">TUE</div>
+        <div class="cal-header">WED</div><div class="cal-header">THU</div><div class="cal-header">FRI</div>
+        <div class="cal-header">SAT</div>
+      </div>
       <div class="calendar-grid" id="calendar"></div>
     </div>
   </div>
@@ -368,39 +570,81 @@
 
 </div>
 
+<!-- Mobile bottom nav -->
+<div class="mobile-nav" id="mobileNav">
+  <button class="nav-btn active" data-view="script" onclick="showView('script')">Script</button>
+  <button class="nav-btn" data-view="progress" onclick="showView('progress')">Progress</button>
+  <button class="nav-btn" data-view="settings" onclick="showView('settings')">Config</button>
+</div>
+
 <script>
 (function(){
-  const LS = {
-    identity: 'fs_identity',
-    checks: 'fs_checks',
-    mode: 'fs_mode',
-  };
-
+  const LS = { identity: 'fs_identity_v2', checks: 'fs_checks_v2', mode: 'fs_mode_v2' };
   let identity = null;
   let checks = {};
+  let currentView = 'script';
 
+  // ── ASCII Art ─────────────────────────────────────────────
+  const bootArt = `
+     _.-""-._
+    /        \\
+   |  O    O  |
+   |    \/    |
+    \\  '--'  /
+     '._  _.'
+        \/
+`;
+  const eyeArt = `
+      _____
+    /       \\
+   |  O   O  |
+   |    v    |
+    \\  \_/  /
+      -----
+`;
+  const ritualArt = `
+    +---------+
+    |  READ   |
+    |   ->    |
+    |  FEEL   |
+    |   ->    |
+    | BECOME  |
+    +---------+
+`;
+
+  function renderAsciiArt() {
+    const bootEl = document.getElementById('bootArt');
+    const setupEl = document.getElementById('setupArt');
+    const ritualEl = document.getElementById('ritualArt');
+    if (bootEl) bootEl.textContent = bootArt;
+    if (setupEl) setupEl.textContent = eyeArt;
+    if (ritualEl) ritualEl.textContent = ritualArt;
+  }
+
+  // ── Date helpers ──────────────────────────────────────────
   function getToday() {
     const d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
+  function getDateStr(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
 
+  // ── Storage ───────────────────────────────────────────────
   function load() {
-    try {
-      identity = JSON.parse(localStorage.getItem(LS.identity));
-    } catch(e) { identity = null; }
-    try {
-      checks = JSON.parse(localStorage.getItem(LS.checks)) || {};
-    } catch(e) { checks = {}; }
+    try { identity = JSON.parse(localStorage.getItem(LS.identity)); } catch(e) { identity = null; }
+    try { checks = JSON.parse(localStorage.getItem(LS.checks)) || {}; } catch(e) { checks = {}; }
     const mode = localStorage.getItem(LS.mode);
     if (mode === 'night') { document.body.setAttribute('data-mode', 'night'); document.getElementById('modeToggle').textContent = '[ DAY ]'; }
   }
-
   function save() {
     localStorage.setItem(LS.identity, JSON.stringify(identity));
     localStorage.setItem(LS.checks, JSON.stringify(checks));
   }
 
+  // ── Boot ──────────────────────────────────────────────────
   function renderBoot() {
+    renderAsciiArt();
     const lines = [
       '> FUTURE_SELF_OS v1.0',
       '> ---------------------',
@@ -418,7 +662,7 @@
       if (i < lines.length) {
         el.textContent += lines[i] + '\n';
         i++;
-        setTimeout(type, 120);
+        setTimeout(type, 80);
       } else {
         document.getElementById('bootButtons').classList.remove('hidden');
       }
@@ -426,6 +670,7 @@
     type();
   }
 
+  // ── Forms ─────────────────────────────────────────────────
   function buildGoalInputs(isEdit) {
     let html = '';
     for (let i = 1; i <= 5; i++) {
@@ -438,11 +683,11 @@
     }
     return html;
   }
-
   function escapeHtml(t) {
     return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // ── Navigation ────────────────────────────────────────────
   function goToSetup() {
     document.getElementById('bootScreen').classList.add('hidden');
     document.getElementById('setupScreen').classList.remove('hidden');
@@ -450,12 +695,21 @@
   }
 
   function showView(name) {
-    ['viewScript','viewProgress','viewSettings'].forEach(v=>document.getElementById(v).classList.add('hidden'));
-    document.getElementById('view'+name.charAt(0).toUpperCase()+name.slice(1)).classList.remove('hidden');
+    currentView = name;
+    ['viewScript','viewProgress','viewSettings'].forEach(v => document.getElementById(v).classList.add('hidden'));
+    document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).classList.remove('hidden');
+
+    // Update mobile nav
+    document.querySelectorAll('.mobile-nav .nav-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-view') === name);
+    });
+
     if (name === 'progress') renderProgress();
     if (name === 'settings') document.getElementById('editForm').innerHTML = buildGoalInputs(true);
+    window.scrollTo(0, 0);
   }
 
+  // ── Identity CRUD ─────────────────────────────────────────
   function saveIdentity() {
     const goals = [], feelings = [];
     for (let i = 1; i <= 5; i++) {
@@ -494,6 +748,7 @@
     renderChecks();
   }
 
+  // ── Script display ────────────────────────────────────────
   function renderScript() {
     if (!identity) return;
     let html = '';
@@ -506,41 +761,13 @@
     document.getElementById('scriptContent').innerHTML = html;
   }
 
+  // ── Streak ────────────────────────────────────────────────
   function getStreak() {
-    const dates = Object.keys(checks).sort();
-    if (dates.length === 0) return 0;
     const today = getToday();
     let streak = 0;
     const d = new Date();
-    // walk backwards from today
-    while (true) {
-      const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-      const entry = checks[ds];
-      if (entry && (entry.morning || entry.night)) {
-        streak++;
-      } else if (ds !== today) {
-        break;
-      }
-      d.setDate(d.getDate() - 1);
-    }
-    // if today has no checks, the loop counts today as broken, but if yesterday had checks we need to recompute properly
-    // simpler: just walk from most recent backwards
-    // Actually correct method:
-    return streak;
-  }
-
-  function getStreakCorrect() {
-    const today = getToday();
-    const dates = Object.keys(checks).filter(d => {
-      const c = checks[d];
-      return c && (c.morning || c.night);
-    }).sort();
-    if (dates.length === 0) return 0;
-    let streak = 0;
-    const d = new Date();
-    // start from today, go back day by day until we hit a gap
     for (let i = 0; i < 3650; i++) {
-      const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const ds = getDateStr(d);
       const entry = checks[ds];
       if (entry && (entry.morning || entry.night)) {
         streak++;
@@ -552,6 +779,7 @@
     return streak;
   }
 
+  // ── Checks & Progress bar ─────────────────────────────────
   function renderChecks() {
     const today = getToday();
     const entry = checks[today] || {};
@@ -563,20 +791,25 @@
 
     const pct = (entry.morning && entry.night) ? 100 : (entry.morning || entry.night) ? 50 : 0;
     document.getElementById('todayPct').textContent = pct + '%';
+
     const bar = document.getElementById('todayBar');
+    const label = document.getElementById('barLabel');
+    const empty = document.getElementById('progressEmpty');
     bar.style.width = pct + '%';
+
     if (pct === 0) {
-      bar.classList.add('empty');
-      bar.textContent = '░░░░░░░░░░░░░░░░░░░░';
+      label.textContent = '';
+      empty.style.opacity = '1';
+      empty.textContent = '░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░';
     } else if (pct === 50) {
-      bar.classList.remove('empty');
-      bar.textContent = '████████████░░░░░░░░';
+      label.textContent = '████████████░░░░░░░░';
+      empty.style.opacity = '0';
     } else {
-      bar.classList.remove('empty');
-      bar.textContent = '████████████████████';
+      label.textContent = '████████████████████ COMPLETE';
+      empty.style.opacity = '0';
     }
 
-    const streak = getStreakCorrect();
+    const streak = getStreak();
     document.getElementById('streakNumber').textContent = streak;
     document.getElementById('streakSub').textContent = streak === 1 ? 'day of reprogramming' : 'days of reprogramming';
   }
@@ -589,15 +822,12 @@
     renderChecks();
   }
 
+  // ── Progress view ─────────────────────────────────────────
   function renderProgress() {
     const today = getToday();
-    const dates = Object.keys(checks).filter(d => {
-      const c = checks[d];
-      return c && (c.morning || c.night);
-    }).sort();
 
     // streak
-    const streak = getStreakCorrect();
+    const streak = getStreak();
     document.getElementById('statStreak').textContent = streak;
 
     // total reads
@@ -620,7 +850,7 @@
     const d = new Date();
     d.setDate(d.getDate() - 29);
     for (let i = 0; i < 30; i++) {
-      const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const ds = getDateStr(d);
       const dayNum = d.getDate();
       const c = checks[ds] || {};
       const morning = !!c.morning;
@@ -630,7 +860,7 @@
       const isToday = ds === today;
 
       const cell = document.createElement('div');
-      cell.className = 'cal-day' + (done ? ' done' : '') + (isToday ? ' today' : '');
+      cell.className = 'cal-day' + (done ? ' done' : partial ? ' partial' : '') + (isToday ? ' today' : '');
       cell.textContent = String(dayNum).padStart(2, '0');
 
       let status = 'None';
@@ -639,39 +869,15 @@
       else if (night) status = 'Night only';
       const tip = document.createElement('div');
       tip.className = 'tooltip';
-      tip.textContent = ds + ' — ' + status;
+      tip.textContent = ds + ' \u2014 ' + status;
       cell.appendChild(tip);
 
       grid.appendChild(cell);
       d.setDate(d.getDate() + 1);
     }
-    // fill header
-    const headers = ['S','M','T','W','T','F','S'];
-    // Actually let's prepend headers. But grid is 7 cols. We should show headers. Let me add them on top.
-    // Wait the grid is 7 columns, I can just prepend 7 header cells.
-    // Actually it's fine, the day numbers make it clear. But adding weekday headers above would be nice.
-    // I'll add a label row separately.
   }
 
-  // add weekday header above calendar
-  function addCalHeader() {
-    const cal = document.getElementById('calendar');
-    if (!cal) return;
-    const hdr = document.createElement('div');
-    hdr.style.display = 'contents';
-    const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    days.forEach(d => {
-      const el = document.createElement('div');
-      el.style.textAlign = 'center';
-      el.style.fontSize = '9px';
-      el.style.color = 'var(--muted)';
-      el.style.letterSpacing = '0.1em';
-      el.textContent = d;
-      hdr.appendChild(el);
-    });
-    cal.parentNode.insertBefore(hdr, cal);
-  }
-
+  // ── Mode ──────────────────────────────────────────────────
   function toggleMode() {
     const isNight = document.body.getAttribute('data-mode') === 'night';
     if (isNight) {
@@ -685,6 +891,7 @@
     }
   }
 
+  // ── Reset/Export ──────────────────────────────────────────
   function resetAll() {
     if (!confirm('DESTROY ALL DATA? This cannot be undone.')) return;
     localStorage.removeItem(LS.identity);
@@ -704,9 +911,10 @@
     URL.revokeObjectURL(url);
   }
 
+  // ── Init ──────────────────────────────────────────────────
   function init() {
     load();
-    addCalHeader();
+    renderAsciiArt();
     if (!identity) {
       renderBoot();
     } else {
@@ -716,7 +924,7 @@
 
   init();
 
-  // expose globals for onclick handlers
+  // expose globals
   window.goToSetup = goToSetup;
   window.saveIdentity = saveIdentity;
   window.updateIdentity = updateIdentity;
