@@ -15,6 +15,14 @@ assert(html.includes('future_self_profiles'), 'App reads/writes future_self_prof
 assert(html.includes('persistRemoteState'), 'App persists state remotely');
 assert(html.includes('loadRemoteState'), 'App loads state remotely');
 assert(html.includes('migrateLocalState'), 'App migrates existing localStorage state');
+assert(html.includes('id="monthLabel"'), 'Progress view has a visible month label');
+assert(html.includes('PREV_MONTH') && html.includes('NEXT_MONTH'), 'Progress view has month navigation buttons');
+assert(html.includes('changeHistoryMonth'), 'Progress view can navigate history months');
+assert(html.includes('renderMonthCalendar'), 'Progress view renders full month calendars');
+assert(html.includes('historyMonthOffset'), 'Progress view tracks selected history month');
+assert(html.includes('read-dot morning'), 'Calendar day renders morning completion visual');
+assert(html.includes('read-dot night'), 'Calendar day renders night completion visual');
+assert(html.includes('monthSummary'), 'Progress view shows selected month completion summary');
 
 assert(schema.includes('create table if not exists public.future_self_profiles'), 'Schema creates profile table');
 assert(schema.includes('alter table public.future_self_profiles enable row level security'), 'Schema enables RLS');

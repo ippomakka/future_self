@@ -416,6 +416,36 @@
     z-index: 10;
   }
   .cal-day:hover .tooltip { display: block; }
+  .month-nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    margin: 28px 0 10px;
+  }
+  .month-nav .btn { padding: 10px 8px; min-height: 42px; font-size: 10px; }
+  .month-title { text-align: center; min-width: 128px; }
+  .month-title .script-header { margin-bottom: 4px; }
+  .month-summary { color: var(--muted); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cal-day.empty { border-color: transparent; pointer-events: none; }
+  .cal-day-content {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    align-items: center;
+    justify-items: center;
+    padding: 4px;
+    gap: 3px;
+  }
+  .read-dots { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; width: 100%; }
+  .read-dot { height: 4px; border: 1px solid var(--muted); opacity: 0.45; }
+  .read-dot.complete { background: var(--accent-bg); border-color: var(--fg); opacity: 1; }
+  .read-dot.morning.complete { border-style: solid; }
+  .read-dot.night.complete { border-style: solid; }
+  .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .legend-dot { display: inline-block; width: 18px; height: 5px; border: 1px solid var(--muted); margin-right: 5px; vertical-align: middle; }
+  .legend-dot.complete { background: var(--accent-bg); border-color: var(--fg); }
 
   /* Navigation - desktop top, mobile bottom */
   .nav {
@@ -690,14 +720,26 @@
       </div>
     </div>
 
-    <div style="margin-top:28px;">
-      <div class="script-header"> Last_30_Days</div>
+    <div>
+      <div class="month-nav" aria-label="Progress history month navigation">
+        <button class="btn secondary" type="button" onclick="changeHistoryMonth(-1)">PREV_MONTH</button>
+        <div class="month-title">
+          <div class="script-header" id="monthLabel"> This_Month</div>
+          <div class="month-summary" id="monthSummary">0/0 reads complete</div>
+        </div>
+        <button class="btn secondary" type="button" id="nextMonthBtn" onclick="changeHistoryMonth(1)">NEXT_MONTH</button>
+      </div>
       <div class="calendar-grid">
         <div class="cal-header">SUN</div><div class="cal-header">MON</div><div class="cal-header">TUE</div>
         <div class="cal-header">WED</div><div class="cal-header">THU</div><div class="cal-header">FRI</div>
         <div class="cal-header">SAT</div>
       </div>
       <div class="calendar-grid" id="calendar"></div>
+      <div class="cal-legend" aria-label="Calendar legend">
+        <span><span class="legend-dot complete"></span>Completed</span>
+        <span><span class="legend-dot"></span>Missing</span>
+        <span>M = morning / N = night</span>
+      </div>
     </div>
   </div>
 
@@ -742,6 +784,7 @@
   let currentView = 'script';
   let currentUser = null;
   let saveTimer = null;
+  let historyMonthOffset = 0;
 
   // ── ASCII Art ─────────────────────────────────────────────
   const gokuArt = String.raw`
@@ -1260,8 +1303,6 @@ ${gokuArt}
 
   // ── Progress view ─────────────────────────────────────────
   function renderProgress() {
-    const today = getToday();
-
     // streak
     const streak = getStreak();
     document.getElementById('statStreak').textContent = streak;
@@ -1280,37 +1321,90 @@ ${gokuArt}
     let rate = possible > 0 ? Math.round((total / possible) * 100) : 0;
     document.getElementById('statRate').textContent = rate + '%';
 
-    // calendar last 30 days
+    renderMonthCalendar();
+  }
+
+  function getHistoryMonthDate() {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + historyMonthOffset);
+    return d;
+  }
+
+  function changeHistoryMonth(delta) {
+    historyMonthOffset += delta;
+    if (historyMonthOffset > 0) historyMonthOffset = 0;
+    renderProgress();
+  }
+
+  function renderMonthCalendar() {
+    const today = getToday();
     const grid = document.getElementById('calendar');
     grid.innerHTML = '';
-    const d = new Date();
-    d.setDate(d.getDate() - 29);
-    for (let i = 0; i < 30; i++) {
+
+    const monthDate = getHistoryMonthDate();
+    const year = monthDate.getFullYear();
+    const month = monthDate.getMonth();
+    const monthName = monthDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    document.getElementById('monthLabel').textContent = monthName;
+
+    const nextBtn = document.getElementById('nextMonthBtn');
+    nextBtn.disabled = historyMonthOffset >= 0;
+
+    const first = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const leadingBlanks = first.getDay();
+    let monthReads = 0;
+    let monthPossible = daysInMonth * 2;
+
+    for (let i = 0; i < leadingBlanks; i++) {
+      const blank = document.createElement('div');
+      blank.className = 'cal-day empty';
+      blank.setAttribute('aria-hidden', 'true');
+      grid.appendChild(blank);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const d = new Date(year, month, day);
       const ds = getDateStr(d);
-      const dayNum = d.getDate();
       const c = checks[ds] || {};
       const morning = !!c.morning;
       const night = !!c.night;
+      if (morning) monthReads++;
+      if (night) monthReads++;
       const done = morning && night;
       const partial = morning || night;
       const isToday = ds === today;
 
       const cell = document.createElement('div');
       cell.className = 'cal-day' + (done ? ' done' : partial ? ' partial' : '') + (isToday ? ' today' : '');
-      cell.textContent = String(dayNum).padStart(2, '0');
 
-      let status = 'None';
-      if (morning && night) status = 'Full';
+      const content = document.createElement('div');
+      content.className = 'cal-day-content';
+      const dayLabel = document.createElement('div');
+      dayLabel.textContent = String(day).padStart(2, '0');
+      const dots = document.createElement('div');
+      dots.className = 'read-dots';
+      dots.innerHTML = `<span class="read-dot morning${morning ? ' complete' : ''}" title="Morning ${morning ? 'complete' : 'missing'}">M</span><span class="read-dot night${night ? ' complete' : ''}" title="Night ${night ? 'complete' : 'missing'}">N</span>`;
+      content.appendChild(dayLabel);
+      content.appendChild(dots);
+      cell.appendChild(content);
+
+      let status = 'No reads';
+      if (morning && night) status = 'Morning + night complete';
       else if (morning) status = 'Morning only';
       else if (night) status = 'Night only';
       const tip = document.createElement('div');
       tip.className = 'tooltip';
       tip.textContent = ds + ' \u2014 ' + status;
       cell.appendChild(tip);
+      cell.setAttribute('aria-label', ds + ': ' + status);
 
       grid.appendChild(cell);
-      d.setDate(d.getDate() + 1);
     }
+
+    const pct = monthPossible > 0 ? Math.round((monthReads / monthPossible) * 100) : 0;
+    document.getElementById('monthSummary').textContent = monthReads + '/' + monthPossible + ' reads complete · ' + pct + '%';
   }
 
   // ── Mode ──────────────────────────────────────────────────
@@ -1376,6 +1470,7 @@ ${gokuArt}
   window.saveIdentity = saveIdentity;
   window.updateIdentity = updateIdentity;
   window.showView = showView;
+  window.changeHistoryMonth = changeHistoryMonth;
   window.markCheck = markCheck;
   window.toggleMode = toggleMode;
   window.resetAll = resetAll;
