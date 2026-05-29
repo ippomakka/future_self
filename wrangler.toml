@@ -1,0 +1,6 @@
+name = "future-self"
+account_id = "2b49cbeb69b2b579c51bc492bd5ec903"
+compatibility_date = "2025-01-01"
+
+[build]
+command = ""
