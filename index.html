@@ -217,13 +217,33 @@
   /* Check section */
   .check-section { margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--muted); }
   @media (min-width: 640px) { .check-section { margin-top: 32px; padding-top: 24px; } }
+  .check-instruction {
+    margin-bottom: 12px;
+    border: 1px solid var(--fg);
+    padding: 12px;
+    color: var(--fg);
+    font-size: 11px;
+    line-height: 1.55;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+  .check-instruction strong {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 4px;
+  }
+  .check-instruction span { color: var(--muted); }
   .checks-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
   .check-card {
     width: 100%;
-    border: 1px solid var(--muted);
+    border: 2px solid var(--fg);
+    background: var(--fg);
+    color: var(--bg);
     padding: 16px;
     text-align: center;
-    transition: border-color 0.2s;
+    font-family: inherit;
+    transition: transform 0.12s ease, background 0.2s, color 0.2s, border-color 0.2s;
     cursor: pointer;
     touch-action: manipulation;
     user-select: none;
@@ -233,12 +253,19 @@
     .checks-row { grid-template-columns: 1fr 1fr; }
     .check-card { padding: 20px; }
   }
-  .check-card:hover { border-color: var(--fg); }
-  .check-card.complete { border-color: var(--fg); border-width: 2px; }
+  .check-card:hover { transform: translateY(-1px); }
+  .check-card:active { transform: translateY(1px); }
+  .check-card.complete {
+    background: var(--accent-bg);
+    color: var(--accent-fg);
+    border-color: var(--accent-bg);
+  }
   .check-card .check-icon { font-size: 20px; margin-bottom: 8px; }
-  .check-card.complete .check-icon::before { content: "[DONE]"; font-size: 11px; letter-spacing: 0.1em; color: var(--fg); font-weight: 700; }
-  .check-card:not(.complete) .check-icon::before { content: "[    ]"; font-size: 11px; letter-spacing: 0.1em; color: var(--muted); }
-  .check-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; color: var(--muted); }
+  .check-card.complete .check-icon::before { content: "[DONE]"; font-size: 11px; letter-spacing: 0.1em; color: inherit; font-weight: 700; }
+  .check-card:not(.complete) .check-icon::before { content: "[TAP]"; font-size: 11px; letter-spacing: 0.1em; color: inherit; font-weight: 700; }
+  .check-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; color: inherit; }
+  .check-cta { font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+  .check-note { font-size: 11px; line-height: 1.5; opacity: 0.85; margin-top: 8px; }
   @media (min-width: 640px) { .check-label { font-size: 11px; } }
 
   /* Progress bar */
@@ -552,17 +579,23 @@
     </div>
 
     <div class="check-section">
+      <div class="check-instruction">
+        <strong>After the ritual, log it here</strong>
+        <span>Read the script. Feel it in your body. Step into the future self. Then tap the matching button below.</span>
+      </div>
       <div class="checks-row">
-        <div class="check-card" id="checkMorning" onclick="markCheck('morning')">
+        <button class="check-card" id="checkMorning" onclick="markCheck('morning')" type="button" aria-pressed="false">
           <div class="check-icon"></div>
           <div class="check-label">Morning_Read</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px">First thing. Before input.</div>
-        </div>
-        <div class="check-card" id="checkNight" onclick="markCheck('night')">
+          <div class="check-cta" id="morningCta">Tap after morning ritual</div>
+          <div class="check-note" id="morningNote">Use after you read, feel, and become. Before input.</div>
+        </button>
+        <button class="check-card" id="checkNight" onclick="markCheck('night')" type="button" aria-pressed="false">
           <div class="check-icon"></div>
           <div class="check-label">Night_Read</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px">Last thing. Before sleep.</div>
-        </div>
+          <div class="check-cta" id="nightCta">Tap after night ritual</div>
+          <div class="check-note" id="nightNote">Use after you read, feel, and become. Before sleep.</div>
+        </button>
       </div>
       <div class="progress-bar-wrapper">
         <div class="progress-label"><span>Today_Completion</span><span id="todayPct">0%</span></div>
@@ -826,6 +859,12 @@
     const n = document.getElementById('checkNight');
     if (entry.morning) m.classList.add('complete'); else m.classList.remove('complete');
     if (entry.night) n.classList.add('complete'); else n.classList.remove('complete');
+    m.setAttribute('aria-pressed', entry.morning ? 'true' : 'false');
+    n.setAttribute('aria-pressed', entry.night ? 'true' : 'false');
+    document.getElementById('morningCta').textContent = entry.morning ? 'Morning ritual logged' : 'Tap after morning ritual';
+    document.getElementById('nightCta').textContent = entry.night ? 'Night ritual logged' : 'Tap after night ritual';
+    document.getElementById('morningNote').textContent = entry.morning ? 'Done for today. Tap again only if this was a mistake.' : 'Use after you read, feel, and become. Before input.';
+    document.getElementById('nightNote').textContent = entry.night ? 'Done for today. Tap again only if this was a mistake.' : 'Use after you read, feel, and become. Before sleep.';
 
     const pct = (entry.morning && entry.night) ? 100 : (entry.morning || entry.night) ? 50 : 0;
     document.getElementById('todayPct').textContent = pct + '%';
