@@ -738,7 +738,6 @@
       <div class="cal-legend" aria-label="Calendar legend">
         <span><span class="legend-dot complete"></span>Completed</span>
         <span><span class="legend-dot"></span>Missing</span>
-        <span>M = morning / N = night</span>
       </div>
     </div>
   </div>
@@ -1385,7 +1384,7 @@ ${gokuArt}
       dayLabel.textContent = String(day).padStart(2, '0');
       const dots = document.createElement('div');
       dots.className = 'read-dots';
-      dots.innerHTML = `<span class="read-dot morning${morning ? ' complete' : ''}" title="Morning ${morning ? 'complete' : 'missing'}">M</span><span class="read-dot night${night ? ' complete' : ''}" title="Night ${night ? 'complete' : 'missing'}">N</span>`;
+      dots.innerHTML = `<span class="read-dot morning${morning ? ' complete' : ''}" title="Morning ${morning ? 'complete' : 'missing'}" aria-label="Morning ${morning ? 'complete' : 'missing'}"></span><span class="read-dot night${night ? ' complete' : ''}" title="Night ${night ? 'complete' : 'missing'}" aria-label="Night ${night ? 'complete' : 'missing'}"></span>`;
       content.appendChild(dayLabel);
       content.appendChild(dots);
       cell.appendChild(content);

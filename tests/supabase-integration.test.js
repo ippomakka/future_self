@@ -22,6 +22,8 @@ assert(html.includes('renderMonthCalendar'), 'Progress view renders full month c
 assert(html.includes('historyMonthOffset'), 'Progress view tracks selected history month');
 assert(html.includes('read-dot morning'), 'Calendar day renders morning completion visual');
 assert(html.includes('read-dot night'), 'Calendar day renders night completion visual');
+assert(!html.includes('>M</span>') && !html.includes('>N</span>'), 'Calendar completion boxes are unlabeled');
+assert(!html.includes('M = morning / N = night'), 'Calendar legend does not mention M/N labels');
 assert(html.includes('monthSummary'), 'Progress view shows selected month completion summary');
 
 assert(schema.includes('create table if not exists public.future_self_profiles'), 'Schema creates profile table');
