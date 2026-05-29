@@ -473,6 +473,7 @@
   .warn { color: var(--muted); font-size: 12px; border-left: 2px solid var(--muted); padding-left: 12px; margin: 16px 0; }
 
   .auth-copy { margin-top: 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+  .auth-art { margin-top: 20px; margin-bottom: 0; }
   .auth-status { min-height: 20px; margin: 10px 0 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
   .user-pill { display: inline-block; border: 1px solid var(--muted); padding: 6px 10px; margin: 0 0 16px; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; max-width: 100%; }
   .sync-status { color: var(--muted); font-size: 11px; margin-top: 12px; min-height: 18px; }
@@ -571,6 +572,7 @@
       <button class="btn secondary" onclick="signIn()">LOGIN</button>
     </div>
     <div class="auth-status" id="authStatus">Use the same login on any device to access your saved program.</div>
+    <div class="ascii-art setup-art auth-art" id="authArt" aria-label="Goku account access ASCII art"></div>
   </div>
 </div>
 
@@ -857,6 +859,7 @@ ${gokuArt}
   function renderAsciiArt() {
     const bootEl = document.getElementById('bootArt');
     const setupEl = document.getElementById('setupArt');
+    const authEl = document.getElementById('authArt');
     if (bootEl) {
       bootEl.textContent = bootFrames[bootFrameIndex];
       if (!bootAuraTimer) {
@@ -867,6 +870,7 @@ ${gokuArt}
       }
     }
     if (setupEl) setupEl.textContent = eyeArt;
+    if (authEl) authEl.textContent = eyeArt;
   }
 
   // ── Date helpers ──────────────────────────────────────────
