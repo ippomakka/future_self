@@ -894,7 +894,7 @@ ${gokuArt}
       const g = goals[i-1] || '';
       const f = feelings[i-1] || '';
       html += `<label>Identity_Axiom_0${i}</label>`;
-      html += `<input type="text" id="goal${i}" placeholder="I am a person who..." value="${isEdit ? escapeHtml(g || '') : ''}">`;
+      html += `<input type="text" id="goal${i}" placeholder="Write in present tense: I am..." value="${isEdit ? escapeHtml(g || '') : ''}">`;
       html += `<label>Emotional_State_0${i}</label>`;
       html += `<textarea id="feel${i}" placeholder="Write in present tense: I feel...">${isEdit ? escapeHtml(f || '') : ''}</textarea>`;
     }
@@ -904,9 +904,9 @@ ${gokuArt}
       const m = materials[i-1] || goals[i+2] || '';
       const mf = materialFeelings[i-1] || feelings[i+2] || '';
       html += `<label>Material_Reality_0${i}</label>`;
-      html += `<input type="text" id="material${i}" placeholder="I physically have..." value="${isEdit ? escapeHtml(m || '') : ''}">`;
+      html += `<input type="text" id="material${i}" placeholder="I have..." value="${isEdit ? escapeHtml(m || '') : ''}">`;
       html += `<label>How_It_Feels_0${i}</label>`;
-      html += `<textarea id="materialFeel${i}" placeholder="Having this makes me feel...">${isEdit ? escapeHtml(mf || '') : ''}</textarea>`;
+      html += `<textarea id="materialFeel${i}" placeholder="I feel...">${isEdit ? escapeHtml(mf || '') : ''}</textarea>`;
     }
     return html;
   }
