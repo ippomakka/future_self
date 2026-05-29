@@ -251,46 +251,28 @@
     justify-content: space-between;
   }
   .progress-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
     width: 100%;
+  }
+  .progress-segment {
+    min-height: 32px;
     border: 1px solid var(--muted);
-    height: 28px;
-    position: relative;
-    overflow: hidden;
-    --completion: 0%;
-    background:
-      linear-gradient(to right,
-        var(--accent-bg) 0%,
-        var(--accent-bg) var(--completion),
-        transparent var(--completion),
-        transparent 100%);
-    transition: background 0.25s ease;
-  }
-  .progress-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 1px;
-    background: var(--muted);
-    opacity: 0.45;
-  }
-  .progress-bar::after {
-    content: attr(data-label);
-    position: absolute;
-    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--muted);
     font-size: 10px;
-    letter-spacing: 0.15em;
-    pointer-events: none;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
-  .progress-bar[data-pct="50"]::after,
-  .progress-bar[data-pct="100"]::after {
+  .progress-segment.complete {
+    background: var(--accent-bg);
+    border-color: var(--fg);
     color: var(--accent-fg);
-    mix-blend-mode: difference;
+    font-weight: 700;
   }
 
   /* Streak */
@@ -518,7 +500,10 @@
       </div>
       <div class="progress-bar-wrapper">
         <div class="progress-label"><span>Today_Completion</span><span id="todayPct">0%</span></div>
-        <div class="progress-bar" id="todayBar" data-pct="0" data-label="░░░░░░░░░░░░░░░░░░░░"></div>
+        <div class="progress-bar" id="todayBar" aria-label="Today completion: 0 percent">
+          <div class="progress-segment" id="segmentMorning">Morning_Read</div>
+          <div class="progress-segment" id="segmentNight">Night_Read</div>
+        </div>
       </div>
     </div>
   </div>
@@ -792,19 +777,13 @@
     document.getElementById('todayPct').textContent = pct + '%';
 
     const bar = document.getElementById('todayBar');
-    bar.style.setProperty('--completion', pct + '%');
-    bar.dataset.pct = String(pct);
-
-    if (pct === 0) {
-      bar.dataset.label = '░░░░░░░░░░░░░░░░░░░░';
-      bar.setAttribute('aria-label', 'Today completion: 0 percent');
-    } else if (pct === 50) {
-      bar.dataset.label = 'HALF_COMPLETE';
-      bar.setAttribute('aria-label', 'Today completion: 50 percent. One session complete.');
-    } else {
-      bar.dataset.label = 'COMPLETE';
-      bar.setAttribute('aria-label', 'Today completion: 100 percent. Morning and night complete.');
-    }
+    const morningSegment = document.getElementById('segmentMorning');
+    const nightSegment = document.getElementById('segmentNight');
+    morningSegment.classList.toggle('complete', !!entry.morning);
+    nightSegment.classList.toggle('complete', !!entry.night);
+    morningSegment.textContent = entry.morning ? 'Morning_Done' : 'Morning_Read';
+    nightSegment.textContent = entry.night ? 'Night_Done' : 'Night_Read';
+    bar.setAttribute('aria-label', 'Today completion: ' + pct + ' percent');
 
     const streak = getStreak();
     document.getElementById('streakNumber').textContent = streak;
