@@ -33,8 +33,9 @@
     transition: background 0.3s, color 0.3s;
     -webkit-font-smoothing: antialiased;
     padding-bottom: 80px;
+    overflow-x: hidden;
   }
-  .container { max-width: 680px; margin: 0 auto; padding: 16px; }
+  .container { width: 100%; max-width: 680px; margin: 0 auto; padding: 16px; overflow-x: hidden; }
   @media (min-width: 640px) { .container { padding: 24px; } }
   .hidden { display: none !important; }
   h1 {
@@ -216,10 +217,9 @@
   /* Check section */
   .check-section { margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--muted); }
   @media (min-width: 640px) { .check-section { margin-top: 32px; padding-top: 24px; } }
-  .checks-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .checks-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
   .check-card {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     border: 1px solid var(--muted);
     padding: 16px;
     text-align: center;
@@ -229,7 +229,10 @@
     user-select: none;
     -webkit-user-select: none;
   }
-  @media (min-width: 640px) { .check-card { padding: 20px; min-width: 220px; } }
+  @media (min-width: 640px) {
+    .checks-row { grid-template-columns: 1fr 1fr; }
+    .check-card { padding: 20px; }
+  }
   .check-card:hover { border-color: var(--fg); }
   .check-card.complete { border-color: var(--fg); border-width: 2px; }
   .check-card .check-icon { font-size: 20px; margin-bottom: 8px; }
@@ -252,7 +255,7 @@
   }
   .progress-bar {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 6px;
     width: 100%;
   }
@@ -273,6 +276,10 @@
     border-color: var(--fg);
     color: var(--accent-fg);
     font-weight: 700;
+  }
+
+  @media (min-width: 640px) {
+    .progress-bar { grid-template-columns: 1fr 1fr; }
   }
 
   /* Streak */
@@ -403,17 +410,67 @@
   .reset-link { color: var(--muted); font-size: 11px; cursor: pointer; text-decoration: underline; margin-top: 24px; display: inline-block; touch-action: manipulation; }
   .reset-link:hover { color: var(--fg); }
 
-  /* Ritual section */
+  /* Ritual section - mobile first */
   .ritual-box {
     border: 1px dashed var(--muted);
-    padding: 12px;
-    margin: 16px 0;
-    text-align: center;
-    font-size: 11px;
+    padding: 14px;
+    margin: 18px 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
     color: var(--muted);
-    line-height: 1.6;
   }
-  @media (min-width: 640px) { .ritual-box { padding: 16px; } }
+  .ritual-flow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .ritual-step {
+    border: 1px solid var(--muted);
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg);
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .ritual-arrow {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1;
+    text-align: center;
+    opacity: 0.75;
+  }
+  .ritual-copy {
+    display: grid;
+    gap: 8px;
+    font-size: 11px;
+    line-height: 1.55;
+    text-align: left;
+  }
+  .ritual-copy p {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .ritual-copy strong {
+    color: var(--fg);
+    font-weight: 700;
+  }
+  @media (min-width: 640px) {
+    .ritual-box { padding: 16px; }
+    .ritual-flow {
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+    .ritual-step { min-height: 48px; }
+    .ritual-arrow { transform: translateY(-1px); }
+    .ritual-copy { text-align: center; }
+  }
 
   /* Animations */
   @keyframes blink { 50% { opacity: 0; } }
@@ -480,9 +537,18 @@
     </div>
 
     <div class="ritual-box">
-      <div id="ritualArt"></div>
-      Read this script every morning before input, every night before sleep.<br>
-      The subconscious learns through repetition and emotion.
+      <div class="ritual-flow" aria-label="Daily ritual flow">
+        <div class="ritual-step">Read</div>
+        <div class="ritual-arrow">↓</div>
+        <div class="ritual-step">Feel</div>
+        <div class="ritual-arrow">↓</div>
+        <div class="ritual-step">Become</div>
+      </div>
+      <div class="ritual-copy">
+        <p><strong>Morning:</strong> read before input.</p>
+        <p><strong>Night:</strong> read before sleep.</p>
+        <p>Repetition + emotion teach the subconscious.</p>
+      </div>
     </div>
 
     <div class="check-section">
@@ -586,23 +652,11 @@
     \\  \_/  /
       -----
 `;
-  const ritualArt = `
-    +---------+
-    |  READ   |
-    |   ->    |
-    |  FEEL   |
-    |   ->    |
-    | BECOME  |
-    +---------+
-`;
-
   function renderAsciiArt() {
     const bootEl = document.getElementById('bootArt');
     const setupEl = document.getElementById('setupArt');
-    const ritualEl = document.getElementById('ritualArt');
     if (bootEl) bootEl.textContent = bootArt;
     if (setupEl) setupEl.textContent = eyeArt;
-    if (ritualEl) ritualEl.textContent = ritualArt;
   }
 
   // ── Date helpers ──────────────────────────────────────────
