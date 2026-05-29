@@ -57,6 +57,19 @@
     margin: 16px 0;
     text-align: center;
   }
+  .boot-art {
+    color: var(--fg);
+    font-size: clamp(8px, 2.25vw, 12px);
+    line-height: 1.05;
+    margin-top: 28px;
+    margin-bottom: 22px;
+    text-shadow: 0 0 8px rgba(127,127,127,0.4);
+    animation: auraPulse 0.42s steps(2, end) infinite;
+  }
+  @keyframes auraPulse {
+    0%, 100% { opacity: 0.82; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-1px); }
+  }
   .ascii-divider {
     color: var(--muted);
     font-size: 10px;
@@ -513,7 +526,7 @@
 
 <!-- BOOT SCREEN -->
 <div id="bootScreen" class="fade-in">
-  <div class="ascii-art" id="bootArt"></div>
+  <div class="ascii-art boot-art" id="bootArt" aria-label="Goku powering up ASCII animation"></div>
   <div class="boot-sequence" id="bootText"></div>
   <div id="bootButtons" class="hidden btn-row">
     <button class="btn" onclick="goToSetup()">INITIALIZE_PROGRAM</button>
@@ -668,15 +681,49 @@
   let currentView = 'script';
 
   // ── ASCII Art ─────────────────────────────────────────────
-  const bootArt = `
-     _.-""-._
-    /        \\
-   |  O    O  |
-   |    \/    |
-    \\  '--'  /
-     '._  _.'
-        \/
-`;
+  const bootFrames = [String.raw`
+        .    \  |  /    .
+     .   \   \ | /   /   .
+          \  ⚡⚡⚡  /
+      >>>  \ /////// /  <<<
+    >>>>>>  /^^^^^^^\  <<<<<<
+  =======  |  O   O  |  =======
+ >>>>>>>  (|    ^    |)  <<<<<<<
+  =======  |  \___/  |  =======
+      >>>  /\_______/\  <<<
+        __/ /|  |  |\ \__
+       /___/ |__|__| \___\
+          /__/     \__\
+    <<<<<  AURA: RISING  >>>>>
+`, String.raw`
+   \   .  >>>  |  <<<  .   /
+    \   >>> ⚡⚡⚡⚡⚡ <<<   /
+ >>> \     /////////     / <<<
+ ====\=== /^^^^^^^^^\ ===/====
+ >>>>>   |  >   <  |   <<<<<
+======= (|    ^    |) =======
+ >>>>>   |  \___/  |   <<<<<
+ ==== /  /\_______/\  \ ====
+ >>> /__/ /|  |  |\ \__\ <<<
+        /_/|__|__|\_\
+          /__/   \__\
+  >>>>>>> AURA: SURGING <<<<<<<
+`, String.raw`
+ >>>>>>>>>>>> ||| <<<<<<<<<<<<
+>>> ⚡⚡⚡ GOKU_POWER_UP ⚡⚡⚡ <<<
+  >>>>   \  ///////  /   <<<<
+=======>  /^^^^^^^^^\  <=======
+>>>>>>   |  O   O  |   <<<<<<
+======> (|    ^    |) <======
+>>>>>>   |  \___/  |   <<<<<<
+======>  /\_______/\  <======
+  >>> __/ /|  |  |\ \__ <<<
+     /___/ |__|__| \___\
+          /__/   \__\
+   >>>>>> AURA: MAXIMUM <<<<<<
+`];
+  let bootFrameIndex = 0;
+  let bootAuraTimer = null;
   const eyeArt = `
       _____
     /       \\
@@ -688,7 +735,15 @@
   function renderAsciiArt() {
     const bootEl = document.getElementById('bootArt');
     const setupEl = document.getElementById('setupArt');
-    if (bootEl) bootEl.textContent = bootArt;
+    if (bootEl) {
+      bootEl.textContent = bootFrames[bootFrameIndex];
+      if (!bootAuraTimer) {
+        bootAuraTimer = setInterval(() => {
+          bootFrameIndex = (bootFrameIndex + 1) % bootFrames.length;
+          bootEl.textContent = bootFrames[bootFrameIndex];
+        }, 180);
+      }
+    }
     if (setupEl) setupEl.textContent = eyeArt;
   }
 
