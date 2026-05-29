@@ -735,6 +735,7 @@
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzY2hvcHd1eWF3ZGhhdmdtYmhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMzQ4MzksImV4cCI6MjA5NTYxMDgzOX0.rWuZvcubuzRuYKJePU5JGRk9ZUIMtnVvre7ZBfsBsoY";
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const PROFILE_TABLE = "future_self_profiles";
+  const APP_URL = "https://daily-reprogramming.pages.dev";
   const LS = { identity: 'fs_identity_v2', checks: 'fs_checks_v2', mode: 'fs_mode_v2' };
   let identity = null;
   let checks = {};
@@ -1066,7 +1067,11 @@ ${gokuArt}
     const password = document.getElementById('authPassword').value;
     if (!email || password.length < 6) { setAuthStatus('Enter an email and a password with at least 6 characters.'); return; }
     setAuthStatus('Creating account...');
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: APP_URL }
+    });
     if (error) { setAuthStatus(error.message); return; }
     if (data.user && data.session) {
       setAuthStatus('Account created. Loading...');
