@@ -24,6 +24,10 @@ assert(html.includes('read-dot morning'), 'Calendar day renders morning completi
 assert(html.includes('read-dot night'), 'Calendar day renders night completion visual');
 assert(!html.includes('>M</span>') && !html.includes('>N</span>'), 'Calendar completion boxes are unlabeled');
 assert(!html.includes('M = morning / N = night'), 'Calendar legend does not mention M/N labels');
+assert(html.includes('.top-bar') && html.includes('position: static'), 'Mode toggle lives in normal top page flow, not fixed over content');
+assert(!html.includes('position: fixed;\n    top: 12px;\n    right: 12px;'), 'Mode toggle is not fixed over the page');
+assert(html.includes('grid-template-areas:') && html.includes('"title title"') && html.includes('"prev next"'), 'Month controls stack safely on mobile');
+assert(html.includes('overflow-wrap: anywhere'), 'Mobile text can wrap instead of overflowing');
 assert(html.includes('monthSummary'), 'Progress view shows selected month completion summary');
 
 assert(schema.includes('create table if not exists public.future_self_profiles'), 'Schema creates profile table');
