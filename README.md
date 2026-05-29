@@ -27,3 +27,4 @@ Everything lives in `localStorage`. No server, no accounts, no tracking. Export 
 ## Files
 
 - `index.html` — the entire app in one file
+
