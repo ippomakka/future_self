@@ -193,7 +193,7 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
-  input[type="text"], textarea {
+  input[type="text"], input[type="email"], input[type="password"], textarea {
     width: 100%;
     background: transparent;
     border: 1px solid var(--muted);
@@ -207,7 +207,7 @@
     border-radius: 0;
     -webkit-appearance: none;
   }
-  input[type="text"]:focus, textarea:focus { border-color: var(--fg); }
+  input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, textarea:focus { border-color: var(--fg); }
   textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
 
   /* Script card */
@@ -471,6 +471,11 @@
 
   /* Warning/Reset */
   .warn { color: var(--muted); font-size: 12px; border-left: 2px solid var(--muted); padding-left: 12px; margin: 16px 0; }
+
+  .auth-copy { margin-top: 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+  .auth-status { min-height: 20px; margin: 10px 0 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+  .user-pill { display: inline-block; border: 1px solid var(--muted); padding: 6px 10px; margin: 0 0 16px; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; max-width: 100%; }
+  .sync-status { color: var(--muted); font-size: 11px; margin-top: 12px; min-height: 18px; }
   .reset-link { color: var(--muted); font-size: 11px; cursor: pointer; text-decoration: underline; margin-top: 24px; display: inline-block; touch-action: manipulation; }
   .reset-link:hover { color: var(--fg); }
 
@@ -547,6 +552,27 @@
 <div class="container">
 
 <button class="mode-toggle" id="modeToggle" onclick="toggleMode()">[ NIGHT ]</button>
+
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="hidden fade-in">
+  <h1>> Account_Access</h1>
+  <div class="ascii-box">
+    <p class="auth-copy">
+      Create an account to save your identity and ritual progress across devices.<br>
+      Existing local data will migrate into your account after login.
+    </p>
+    <label for="authEmail">Email</label>
+    <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email">
+    <label for="authPassword">Password</label>
+    <input type="password" id="authPassword" placeholder="Minimum 6 characters" autocomplete="current-password">
+    <div class="btn-row">
+      <button class="btn" onclick="signUp()">REGISTER</button>
+      <button class="btn secondary" onclick="signIn()">LOGIN</button>
+    </div>
+    <div class="auth-status" id="authStatus">Use the same login on any device to access your saved program.</div>
+  </div>
+</div>
 
 <!-- BOOT SCREEN -->
 <div id="bootScreen" class="fade-in">
@@ -678,11 +704,14 @@
     <h1>> Config</h1>
     <div class="ascii-box">
       <p class="warn">WARNING: Editing your identity will reset your streak. The subconscious does not respond to constant changes.</p>
+      <div class="user-pill" id="userPill">Signed in</div>
       <div id="editForm"></div>
       <div class="btn-row" style="margin-top:8px;">
         <button class="btn" onclick="updateIdentity()">UPDATE_IDENTITY</button>
         <button class="btn secondary" onclick="exportData()">EXPORT_DATA</button>
+        <button class="btn secondary" onclick="signOut()">LOG_OUT</button>
       </div>
+      <div class="sync-status" id="syncStatus">Synced with Supabase</div>
       <a class="reset-link" onclick="resetAll()">[ DESTROY_ALL_DATA ]</a>
     </div>
   </div>
@@ -697,12 +726,19 @@
   <button class="nav-btn" data-view="settings" onclick="showView('settings')">Config</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
+  const SUPABASE_URL = "https://zschopwuyawdhavgmbhi.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzY2hvcHd1eWF3ZGhhdmdtYmhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMzQ4MzksImV4cCI6MjA5NTYxMDgzOX0.rWuZvcubuzRuYKJePU5JGRk9ZUIMtnVvre7ZBfsBsoY";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const PROFILE_TABLE = "future_self_profiles";
   const LS = { identity: 'fs_identity_v2', checks: 'fs_checks_v2', mode: 'fs_mode_v2' };
   let identity = null;
   let checks = {};
   let currentView = 'script';
+  let currentUser = null;
+  let saveTimer = null;
 
   // ── ASCII Art ─────────────────────────────────────────────
   const gokuArt = String.raw`
@@ -843,15 +879,85 @@ ${gokuArt}
   }
 
   // ── Storage ───────────────────────────────────────────────
-  function load() {
+  function loadLocalState() {
     try { identity = JSON.parse(localStorage.getItem(LS.identity)); } catch(e) { identity = null; }
     try { checks = JSON.parse(localStorage.getItem(LS.checks)) || {}; } catch(e) { checks = {}; }
+  }
+
+  function loadMode() {
     const mode = localStorage.getItem(LS.mode);
     if (mode === 'night') { document.body.setAttribute('data-mode', 'night'); document.getElementById('modeToggle').textContent = '[ DAY ]'; }
   }
-  function save() {
+
+  function saveLocalState() {
     localStorage.setItem(LS.identity, JSON.stringify(identity));
     localStorage.setItem(LS.checks, JSON.stringify(checks));
+  }
+
+  function setSyncStatus(message) {
+    const el = document.getElementById('syncStatus');
+    if (el) el.textContent = message || '';
+  }
+
+  async function loadRemoteState() {
+    if (!currentUser) return;
+    const { data, error } = await supabaseClient
+      .from(PROFILE_TABLE)
+      .select('identity, checks')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (data) {
+      identity = data.identity || null;
+      checks = data.checks || {};
+      saveLocalState();
+    }
+  }
+
+  async function persistRemoteState() {
+    if (!currentUser) return;
+    setSyncStatus('Syncing...');
+    const { error } = await supabaseClient.from(PROFILE_TABLE).upsert({
+      id: currentUser.id,
+      email: currentUser.email,
+      identity,
+      checks: checks || {}
+    });
+    if (error) {
+      console.error('Supabase sync failed', error);
+      setSyncStatus('Sync paused: run supabase/schema.sql if this is a new project.');
+      return;
+    }
+    setSyncStatus('Synced with Supabase');
+  }
+
+  function queueRemoteSave() {
+    if (!currentUser) return;
+    window.clearTimeout(saveTimer);
+    saveTimer = window.setTimeout(persistRemoteState, 250);
+  }
+
+  function save() {
+    saveLocalState();
+    queueRemoteSave();
+  }
+
+  async function migrateLocalState() {
+    if (!currentUser) return;
+    const localIdentity = identity;
+    const localChecks = checks || {};
+    await loadRemoteState();
+    const hasRemote = !!identity || Object.keys(checks || {}).length > 0;
+    const hasLocal = !!localIdentity || Object.keys(localChecks || {}).length > 0;
+    if (!hasRemote && hasLocal) {
+      identity = localIdentity;
+      checks = localChecks;
+      saveLocalState();
+      await persistRemoteState();
+    } else if (!hasRemote) {
+      checks = {};
+      await persistRemoteState();
+    }
   }
 
   // ── Boot ──────────────────────────────────────────────────
@@ -914,9 +1020,82 @@ ${gokuArt}
     return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+
+  function hideAllScreens() {
+    ['authScreen','bootScreen','setupScreen','dashScreen'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
+    document.getElementById('mobileNav').classList.add('hidden');
+  }
+
+  function showAuth() {
+    hideAllScreens();
+    document.getElementById('authScreen').classList.remove('hidden');
+  }
+
+  function setAuthStatus(message) {
+    const el = document.getElementById('authStatus');
+    if (el) el.textContent = message || '';
+  }
+
+  async function afterAuth(user) {
+    currentUser = user;
+    loadLocalState();
+    try {
+      await migrateLocalState();
+    } catch (error) {
+      console.error('Profile load failed', error);
+      setAuthStatus('Account connected. Run supabase/schema.sql to enable cloud storage.');
+    }
+    if (!identity) {
+      hideAllScreens();
+      renderBoot();
+      document.getElementById('bootScreen').classList.remove('hidden');
+    } else {
+      showDashboard();
+    }
+  }
+
+  async function signUp() {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    if (!email || password.length < 6) { setAuthStatus('Enter an email and a password with at least 6 characters.'); return; }
+    setAuthStatus('Creating account...');
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) { setAuthStatus(error.message); return; }
+    if (data.user && data.session) {
+      setAuthStatus('Account created. Loading...');
+      await afterAuth(data.user);
+    } else {
+      setAuthStatus('Check your email to confirm, then log in.');
+    }
+  }
+
+  async function signIn() {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    if (!email || !password) { setAuthStatus('Enter your email and password.'); return; }
+    setAuthStatus('Logging in...');
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) { setAuthStatus(error.message); return; }
+    await afterAuth(data.user);
+  }
+
+  async function signOut() {
+    await persistRemoteState();
+    await supabaseClient.auth.signOut();
+    currentUser = null;
+    identity = null;
+    checks = {};
+    localStorage.removeItem(LS.identity);
+    localStorage.removeItem(LS.checks);
+    showAuth();
+  }
+
   // ── Navigation ────────────────────────────────────────────
   function goToSetup() {
-    document.getElementById('bootScreen').classList.add('hidden');
+    hideAllScreens();
     document.getElementById('setupScreen').classList.remove('hidden');
     document.getElementById('setupForm').innerHTML = buildGoalInputs(false);
   }
@@ -974,9 +1153,11 @@ ${gokuArt}
   }
 
   function showDashboard() {
-    document.getElementById('bootScreen').classList.add('hidden');
-    document.getElementById('setupScreen').classList.add('hidden');
+    hideAllScreens();
     document.getElementById('dashScreen').classList.remove('hidden');
+    document.getElementById('mobileNav').classList.remove('hidden');
+    const pill = document.getElementById('userPill');
+    if (pill && currentUser) pill.textContent = 'Signed in: ' + currentUser.email;
     showView('script');
     renderScript();
     renderChecks();
@@ -1138,11 +1319,12 @@ ${gokuArt}
   }
 
   // ── Reset/Export ──────────────────────────────────────────
-  function resetAll() {
+  async function resetAll() {
     if (!confirm('DESTROY ALL DATA? This cannot be undone.')) return;
     localStorage.removeItem(LS.identity);
     localStorage.removeItem(LS.checks);
     identity = null; checks = {};
+    if (currentUser) await persistRemoteState();
     location.reload();
   }
 
@@ -1158,20 +1340,30 @@ ${gokuArt}
   }
 
   // ── Init ──────────────────────────────────────────────────
-  function init() {
-    load();
+  async function init() {
+    loadMode();
     renderAsciiArt();
-    if (!identity) {
-      renderBoot();
-    } else {
-      showDashboard();
+    hideAllScreens();
+    const { data } = await supabaseClient.auth.getSession();
+    currentUser = data.session && data.session.user ? data.session.user : null;
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      currentUser = session && session.user ? session.user : null;
+    });
+    if (!currentUser) {
+      loadLocalState();
+      showAuth();
+      return;
     }
+    await afterAuth(currentUser);
   }
 
   init();
 
   // expose globals
   window.goToSetup = goToSetup;
+  window.signUp = signUp;
+  window.signIn = signIn;
+  window.signOut = signOut;
   window.saveIdentity = saveIdentity;
   window.updateIdentity = updateIdentity;
   window.showView = showView;
