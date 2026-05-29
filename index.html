@@ -236,9 +236,20 @@
     gap: 8px;
   }
   .script-header::before { content: "///"; }
+  .form-section-title, .script-section-title {
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin: 22px 0 12px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--muted);
+  }
+  .form-section-title:first-child, .script-section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
   .goal-block { margin-bottom: 18px; }
   .goal-block .goal-title { font-weight: 700; margin-bottom: 6px; word-break: break-word; }
   .goal-block .goal-feel { color: var(--muted); padding-left: 12px; border-left: 2px solid var(--muted); word-break: break-word; }
+  .material-block .goal-title::before { content: "[HAVE] "; color: var(--muted); font-weight: 400; }
 
   /* Check section */
   .check-section { margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--muted); }
@@ -553,8 +564,8 @@
   <div class="ascii-box">
     <p style="margin-top:0; font-size: 13px; line-height: 1.7;">
       Enter the future version of yourself.<br>
-      These are not goals to chase. These are facts about who you already are.<br>
-      Write in present tense. Focus on feeling.
+      Write 3 identity truths, then 2 material realities you physically have around you.<br>
+      These are not wishes. These are facts you rehearse with feeling.
     </p>
     <div id="setupForm"></div>
     <div class="btn-row">
@@ -873,14 +884,29 @@ ${gokuArt}
 
   // ── Forms ─────────────────────────────────────────────────
   function buildGoalInputs(isEdit) {
-    let html = '';
-    for (let i = 1; i <= 5; i++) {
-      const g = identity && identity.goals ? identity.goals[i-1] : '';
-      const f = identity && identity.feelings ? identity.feelings[i-1] : '';
+    let html = '<div class="form-section-title">Identity_Axioms</div>';
+    const goals = identity && identity.goals ? identity.goals : [];
+    const feelings = identity && identity.feelings ? identity.feelings : [];
+    const materials = identity && identity.materials ? identity.materials : [];
+    const materialFeelings = identity && identity.materialFeelings ? identity.materialFeelings : [];
+
+    for (let i = 1; i <= 3; i++) {
+      const g = goals[i-1] || '';
+      const f = feelings[i-1] || '';
       html += `<label>Identity_Axiom_0${i}</label>`;
       html += `<input type="text" id="goal${i}" placeholder="I am a person who..." value="${isEdit ? escapeHtml(g || '') : ''}">`;
       html += `<label>Emotional_State_0${i}</label>`;
       html += `<textarea id="feel${i}" placeholder="Write in present tense: I feel...">${isEdit ? escapeHtml(f || '') : ''}</textarea>`;
+    }
+
+    html += '<div class="form-section-title">Material_Reality</div>';
+    for (let i = 1; i <= 2; i++) {
+      const m = materials[i-1] || goals[i+2] || '';
+      const mf = materialFeelings[i-1] || feelings[i+2] || '';
+      html += `<label>Material_Reality_0${i}</label>`;
+      html += `<input type="text" id="material${i}" placeholder="I physically have..." value="${isEdit ? escapeHtml(m || '') : ''}">`;
+      html += `<label>How_It_Feels_0${i}</label>`;
+      html += `<textarea id="materialFeel${i}" placeholder="Having this makes me feel...">${isEdit ? escapeHtml(mf || '') : ''}</textarea>`;
     }
     return html;
   }
@@ -911,30 +937,37 @@ ${gokuArt}
   }
 
   // ── Identity CRUD ─────────────────────────────────────────
-  function saveIdentity() {
-    const goals = [], feelings = [];
-    for (let i = 1; i <= 5; i++) {
+  function collectIdentityFromForm(alertMessage) {
+    const goals = [], feelings = [], materials = [], materialFeelings = [];
+    for (let i = 1; i <= 3; i++) {
       const g = document.getElementById('goal'+i).value.trim();
       const f = document.getElementById('feel'+i).value.trim();
-      if (!g || !f) { alert('All fields required. The subconscious rejects incomplete programs.'); return; }
+      if (!g || !f) { alert(alertMessage); return null; }
       goals.push(g); feelings.push(f);
     }
-    identity = { goals, feelings, lockedAt: new Date().toISOString() };
+    for (let i = 1; i <= 2; i++) {
+      const m = document.getElementById('material'+i).value.trim();
+      const mf = document.getElementById('materialFeel'+i).value.trim();
+      if (!m || !mf) { alert(alertMessage); return null; }
+      materials.push(m); materialFeelings.push(mf);
+    }
+    return { goals, feelings, materials, materialFeelings, lockedAt: new Date().toISOString() };
+  }
+
+  function saveIdentity() {
+    const nextIdentity = collectIdentityFromForm('All fields required. The subconscious rejects incomplete programs.');
+    if (!nextIdentity) return;
+    identity = nextIdentity;
     checks = {};
     save();
     showDashboard();
   }
 
   function updateIdentity() {
-    const goals = [], feelings = [];
-    for (let i = 1; i <= 5; i++) {
-      const g = document.getElementById('goal'+i).value.trim();
-      const f = document.getElementById('feel'+i).value.trim();
-      if (!g || !f) { alert('All fields required.'); return; }
-      goals.push(g); feelings.push(f);
-    }
+    const nextIdentity = collectIdentityFromForm('All fields required.');
+    if (!nextIdentity) return;
     if (!confirm('This will restart your streak. The subconscious needs consistency. Proceed?')) return;
-    identity = { goals, feelings, lockedAt: new Date().toISOString() };
+    identity = nextIdentity;
     checks = {};
     save();
     showDashboard();
@@ -952,13 +985,27 @@ ${gokuArt}
   // ── Script display ────────────────────────────────────────
   function renderScript() {
     if (!identity) return;
-    let html = '';
-    identity.goals.forEach((g, i) => {
-      html += `<div class="goal-block">
+    const goals = identity.goals || [];
+    const feelings = identity.feelings || [];
+    const materials = identity.materials || goals.slice(3, 5);
+    const materialFeelings = identity.materialFeelings || feelings.slice(3, 5);
+    let html = '<div class="script-section-title">Who_I_Am</div>';
+
+    goals.slice(0, 3).forEach((g, i) => {
+      html += `<div class="goal-block identity-block">
         <div class="goal-title">> ${escapeHtml(g)}</div>
-        <div class="goal-feel">${escapeHtml(identity.feelings[i])}</div>
+        <div class="goal-feel">${escapeHtml(feelings[i] || '')}</div>
       </div>`;
     });
+
+    html += '<div class="script-section-title">What_I_Physically_Have</div>';
+    materials.slice(0, 2).forEach((m, i) => {
+      html += `<div class="goal-block material-block">
+        <div class="goal-title">> ${escapeHtml(m)}</div>
+        <div class="goal-feel">${escapeHtml(materialFeelings[i] || '')}</div>
+      </div>`;
+    });
+
     document.getElementById('scriptContent').innerHTML = html;
   }
 
