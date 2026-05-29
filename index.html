@@ -238,7 +238,7 @@
   .check-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; color: var(--muted); }
   @media (min-width: 640px) { .check-label { font-size: 11px; } }
 
-  /* Progress bar - FIXED */
+  /* Progress bar */
   .progress-bar-wrapper { margin-top: 20px; }
   @media (min-width: 640px) { .progress-bar-wrapper { margin-top: 24px; } }
   .progress-label {
@@ -255,31 +255,30 @@
     border: 1px solid var(--muted);
     height: 28px;
     position: relative;
-    background: transparent;
     overflow: hidden;
+    --completion: 0%;
+    background:
+      linear-gradient(to right,
+        var(--accent-bg) 0%,
+        var(--accent-bg) var(--completion),
+        transparent var(--completion),
+        transparent 100%);
+    transition: background 0.25s ease;
   }
-  .progress-fill {
-    height: 100%;
-    background: var(--accent-bg);
-    transition: width 0.6s ease;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 8px;
-    min-width: 0;
-  }
-  .progress-fill-text {
-    color: var(--accent-fg);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-  }
-  .progress-empty {
+  .progress-bar::before {
+    content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: var(--muted);
+    opacity: 0.45;
+  }
+  .progress-bar::after {
+    content: attr(data-label);
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -287,6 +286,11 @@
     font-size: 10px;
     letter-spacing: 0.15em;
     pointer-events: none;
+  }
+  .progress-bar[data-pct="50"]::after,
+  .progress-bar[data-pct="100"]::after {
+    color: var(--accent-fg);
+    mix-blend-mode: difference;
   }
 
   /* Streak */
@@ -514,12 +518,7 @@
       </div>
       <div class="progress-bar-wrapper">
         <div class="progress-label"><span>Today_Completion</span><span id="todayPct">0%</span></div>
-        <div class="progress-bar">
-          <div class="progress-empty" id="progressEmpty">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</div>
-          <div class="progress-fill" id="todayBar" style="width:0%">
-            <span class="progress-fill-text" id="barLabel"></span>
-          </div>
-        </div>
+        <div class="progress-bar" id="todayBar" data-pct="0" data-label="░░░░░░░░░░░░░░░░░░░░"></div>
       </div>
     </div>
   </div>
@@ -793,20 +792,18 @@
     document.getElementById('todayPct').textContent = pct + '%';
 
     const bar = document.getElementById('todayBar');
-    const label = document.getElementById('barLabel');
-    const empty = document.getElementById('progressEmpty');
-    bar.style.width = pct + '%';
+    bar.style.setProperty('--completion', pct + '%');
+    bar.dataset.pct = String(pct);
 
     if (pct === 0) {
-      label.textContent = '';
-      empty.style.opacity = '1';
-      empty.textContent = '░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░';
+      bar.dataset.label = '░░░░░░░░░░░░░░░░░░░░';
+      bar.setAttribute('aria-label', 'Today completion: 0 percent');
     } else if (pct === 50) {
-      label.textContent = '████████████░░░░░░░░';
-      empty.style.opacity = '0';
+      bar.dataset.label = 'HALF_COMPLETE';
+      bar.setAttribute('aria-label', 'Today completion: 50 percent. One session complete.');
     } else {
-      label.textContent = '████████████████████ COMPLETE';
-      empty.style.opacity = '0';
+      bar.dataset.label = 'COMPLETE';
+      bar.setAttribute('aria-label', 'Today completion: 100 percent. Morning and night complete.');
     }
 
     const streak = getStreak();
