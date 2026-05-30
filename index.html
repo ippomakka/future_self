@@ -895,8 +895,8 @@
   let discoveryDraft = null;
   const discoveryAnswers = { done: [], desired: [], physical: [] };
   const discoverySteps = [
-    { key: 'done', prompt: 'What are you tired of feeling?', note: 'Choose up to 3.', options: ['anxious','scattered','numb','insecure','overwhelmed','stuck','unmotivated','disconnected','behind','not enough'] },
-    { key: 'desired', prompt: 'What would feel better?', note: 'Choose up to 3.', options: ['calm','clear','confident','focused','alive','free','worthy','disciplined','present','safe'] },
+    { key: 'done', prompt: 'What feels heavy right now?', note: 'Choose up to 3 signals.', options: ['anxious','scattered','numb','insecure','overwhelmed','stuck','unmotivated','disconnected','behind','not enough'] },
+    { key: 'desired', prompt: 'What do you have instead?', note: 'Choose up to 3.', options: ['calm','clear','confident','focused','alive','free','worthy','disciplined','present','safe'] },
     { key: 'physical', prompt: 'What physical shift would change things?', note: 'Choose up to 3.', options: ['more energy','better sleep','a stronger body','clearer skin','better posture','less tension','healthier eating','more stamina','confidence in my appearance','a cleaner environment','a body I trust','feeling attractive'] }
   ];
 
@@ -1337,12 +1337,12 @@ ${gokuArt}
     return {
       goals: [
         `I am someone who feels ${desiredText}.`,
-        `I am no longer ruled by feeling ${doneText}.`,
+        `I have the inner state of ${desiredText}.`,
         `I am becoming the version of myself who chooses this direction daily.`
       ],
       feelings: [
         `I feel ${desiredText} in my mind and body.`,
-        `I feel free from ${doneText} because I am installing a new default.`,
+        `I feel stable, resourced, and anchored in ${primaryDesired}.`,
         `I feel ${primaryDesired}, present, and committed every morning and night.`
       ],
       materials: [
@@ -1369,9 +1369,9 @@ ${gokuArt}
     document.getElementById('discoveryFlowPanel').classList.add('hidden');
     document.getElementById('discoveryResultPanel').classList.remove('hidden');
     document.getElementById('discoveryResult').innerHTML = `
-      <p>You are done feeling <strong>${escapeHtml(doneText)}</strong>.</p>
-      <p>You are becoming someone who feels <strong>${escapeHtml(desiredText)}</strong>.</p>
-      <p>Physically, you are moving toward <strong>${escapeHtml(physicalText)}</strong>.</p>
+      <p>Your signal points toward <strong>${escapeHtml(desiredText)}</strong>.</p>
+      <p>You have the inner state of <strong>${escapeHtml(desiredText)}</strong>.</p>
+      <p>Physically, you have <strong>${escapeHtml(physicalText)}</strong>.</p>
     `;
   }
 
