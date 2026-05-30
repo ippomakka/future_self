@@ -727,7 +727,7 @@
   <h1>> Identity_Configuration</h1>
   <div class="ascii-art setup-art" id="setupArt" aria-label="Goku identity setup ASCII art"></div>
   <div class="ascii-box">
-    <p style="margin-top:0; font-size: 13px; line-height: 1.7;">
+    <p id="setupIntro" style="margin-top:0; font-size: 13px; line-height: 1.7;">
       Enter the future version of yourself.<br>
       Write 3 identity truths, then 2 material realities you physically have around you.<br>
       These are not wishes. These are facts you rehearse with feeling.
@@ -1375,24 +1375,27 @@ ${gokuArt}
     `;
   }
 
-  function saveDiscoveryIdentity() {
-    identity = discoveryDraft || buildDiscoveryIdentity();
-    checks = {};
-    save();
-    showDashboard();
-  }
-
-  function editDiscoveryIdentity() {
+  function reviewDiscoveryIdentity() {
     identity = discoveryDraft || buildDiscoveryIdentity();
     hideAllScreens();
     document.getElementById('setupScreen').classList.remove('hidden');
+    document.getElementById('setupIntro').innerHTML = 'Review your generated direction.<br>Edit anything that feels off, then lock it in when it feels true enough.';
     document.getElementById('setupForm').innerHTML = buildGoalInputs(true);
+  }
+
+  function saveDiscoveryIdentity() {
+    reviewDiscoveryIdentity();
+  }
+
+  function editDiscoveryIdentity() {
+    reviewDiscoveryIdentity();
   }
 
   // ── Navigation ────────────────────────────────────────────
   function goToSetup() {
     hideAllScreens();
     document.getElementById('setupScreen').classList.remove('hidden');
+    document.getElementById('setupIntro').innerHTML = 'Enter the future version of yourself.<br>Write 3 identity truths, then 2 material realities you physically have around you.<br>These are not wishes. These are facts you rehearse with feeling.';
     document.getElementById('setupForm').innerHTML = buildGoalInputs(false);
   }
 
@@ -1426,7 +1429,14 @@ ${gokuArt}
       if (!m || !mf) { alert(alertMessage); return null; }
       materials.push(m); materialFeelings.push(mf);
     }
-    return { goals, feelings, materials, materialFeelings, lockedAt: new Date().toISOString() };
+    return {
+      goals,
+      feelings,
+      materials,
+      materialFeelings,
+      ...(identity?.discovery ? { discovery: identity.discovery } : {}),
+      lockedAt: new Date().toISOString()
+    };
   }
 
   function saveIdentity() {
@@ -1719,6 +1729,7 @@ ${gokuArt}
   window.previousDiscoveryStep = previousDiscoveryStep;
   window.nextDiscoveryStep = nextDiscoveryStep;
   window.buildDiscoveryIdentity = buildDiscoveryIdentity;
+  window.reviewDiscoveryIdentity = reviewDiscoveryIdentity;
   window.saveDiscoveryIdentity = saveDiscoveryIdentity;
   window.editDiscoveryIdentity = editDiscoveryIdentity;
   window.goToSetup = goToSetup;
