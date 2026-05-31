@@ -1707,13 +1707,7 @@ ${gokuArt}
       currentUser = session && session.user ? session.user : null;
     });
     if (!currentUser) {
-      loadLocalState();
-      if (identity) {
-        showDashboard();
-      } else {
-        renderBoot();
-        document.getElementById('bootScreen').classList.remove('hidden');
-      }
+      showAuth();
       return;
     }
     await afterAuth(currentUser);

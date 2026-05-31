@@ -11,6 +11,7 @@ assert(html.includes('REGISTER') && html.includes('LOGIN'), 'Register and login 
 assert(html.includes('function signUp') || html.includes('async function signUp'), 'signUp function exists');
 assert(html.includes('function signIn') || html.includes('async function signIn'), 'signIn function exists');
 assert(html.includes('function signOut') || html.includes('async function signOut'), 'signOut function exists');
+assert(/if \(!currentUser\) \{[\s\S]*?showAuth\(\);[\s\S]*?return;[\s\S]*?\}/.test(html), 'Unauthenticated users see Supabase login before app setup');
 assert(html.includes('future_self_profiles'), 'App reads/writes future_self_profiles table');
 assert(html.includes('persistRemoteState'), 'App persists state remotely');
 assert(html.includes('loadRemoteState'), 'App loads state remotely');

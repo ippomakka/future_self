@@ -13,6 +13,8 @@ assert(html.includes('Choose up to 3'), 'Guided steps stay short with a clear se
 assert(html.includes('buildDiscoveryIdentity'), 'Discovery answers can generate a starting identity');
 assert(html.includes('renderDiscoveryStep'), 'Discovery flow renders one short step at a time');
 assert(html.includes('showDiscoveryChoice'), 'Setup starts with optional manual vs guided choice');
+assert(/if \(!currentUser\) \{[\s\S]*?showAuth\(\);[\s\S]*?return;[\s\S]*?\}/.test(html), 'Unauthenticated users keep Supabase login as the first screen on production');
+assert(/async function afterAuth\(user\) \{[\s\S]*?if \(!identity\) \{[\s\S]*?renderBoot\(\);[\s\S]*?bootScreen[\s\S]*?\}/.test(html), 'Logged-in users without an identity continue into boot/discovery setup');
 assert(html.includes('reviewDiscoveryIdentity'), 'SAVE_THIS opens a final editable review instead of locking immediately');
 const saveDiscoveryBody = html.match(/function saveDiscoveryIdentity\(\) \{([\s\S]*?)\n  \}/)[1];
 assert(saveDiscoveryBody.includes('reviewDiscoveryIdentity();'), 'SAVE_THIS routes to final edit form before lock-in');
@@ -24,7 +26,5 @@ assert(!html.includes('no longer ruled'), 'Generated identity does not focus on 
 assert(!html.includes('free from ${doneText}'), 'Generated feelings avoid reinforcing unwanted states');
 assert(!html.includes('You are done feeling'), 'Discovery result summary avoids negative lock-in phrasing');
 assert(html.includes('I have the inner state of ${desiredText}.'), 'Generated identity focuses on what the user has now');
-assert(!/if \(!currentUser\) \{[\s\S]*?showAuth\(\);[\s\S]*?return;[\s\S]*?\}/.test(html), 'Feature branch does not show sign/login as the first unauthenticated screen');
-assert(/if \(!currentUser\) \{[\s\S]*?renderBoot\(\);[\s\S]*?bootScreen[\s\S]*?return;[\s\S]*?\}/.test(html), 'Unauthenticated users start at the boot/setup flow');
 
 console.log('Discovery flow static checks passed');
