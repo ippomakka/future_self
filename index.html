@@ -711,6 +711,7 @@
     <ul class="discovery-question-list" id="discoveryQuestions"></ul>
     <p class="discovery-note" id="discoveryNote"></p>
     <div class="btn-row">
+      <button class="btn secondary hidden" type="button" id="discoveryExit" onclick="exitDiscoveryFlow()">EXIT_TO_CONFIG</button>
       <button class="btn secondary" type="button" id="discoveryBack" onclick="previousDiscoveryStep()">BACK</button>
       <button class="btn" type="button" id="discoveryNext" onclick="nextDiscoveryStep()">NEXT</button>
     </div>
@@ -723,6 +724,7 @@
       <p>When it feels clear enough, write your own identity. Do not copy the questions. Translate what you know into your words.</p>
     </div>
     <div class="btn-row">
+      <button class="btn secondary hidden" type="button" id="discoveryResultExit" onclick="exitDiscoveryFlow()">EXIT_TO_CONFIG</button>
       <button class="btn" type="button" onclick="goToSetup()">WRITE_MY_IDENTITY</button>
       <button class="btn secondary" type="button" onclick="startDiscoveryFlow()">REVIEW_QUESTIONS</button>
     </div>
@@ -1345,7 +1347,22 @@ ${gokuArt}
     document.getElementById('discoveryChoicePanel').classList.add('hidden');
     document.getElementById('discoveryResultPanel').classList.add('hidden');
     document.getElementById('discoveryFlowPanel').classList.remove('hidden');
+    setDiscoveryExitVisibility();
     renderDiscoveryStep();
+  }
+
+  function setDiscoveryExitVisibility() {
+    const canExit = !!identity;
+    ['discoveryExit', 'discoveryResultExit'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden', !canExit);
+    });
+  }
+
+  function exitDiscoveryFlow() {
+    if (!identity) return;
+    showDashboard();
+    showView('settings');
   }
 
   function renderDiscoveryStep() {
@@ -1373,6 +1390,7 @@ ${gokuArt}
     }
     document.getElementById('discoveryFlowPanel').classList.add('hidden');
     document.getElementById('discoveryResultPanel').classList.remove('hidden');
+    setDiscoveryExitVisibility();
   }
 
   // ── Navigation ────────────────────────────────────────────
@@ -1705,6 +1723,7 @@ ${gokuArt}
   window.renderDiscoveryStep = renderDiscoveryStep;
   window.previousDiscoveryStep = previousDiscoveryStep;
   window.nextDiscoveryStep = nextDiscoveryStep;
+  window.exitDiscoveryFlow = exitDiscoveryFlow;
   window.goToSetup = goToSetup;
   window.signUp = signUp;
   window.signIn = signIn;

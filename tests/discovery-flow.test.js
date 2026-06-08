@@ -22,6 +22,10 @@ assert(html.includes('Mental_Rehearsal'), 'Guide ends with mental rehearsal rath
 assert(html.includes('Think the thoughts of that future self'), 'Mental rehearsal copy asks the user to rehearse thoughts');
 assert(html.includes('Feel the emotions before the outer proof arrives'), 'Mental rehearsal copy asks the user to feel emotions before results');
 assert(html.includes('WRITE_MY_IDENTITY'), 'Guide ultimately sends the user to write their own identity');
+assert(html.includes('EXIT_TO_CONFIG'), 'Locked-in users can exit the guided process back to Config');
+assert(html.includes('function exitDiscoveryFlow'), 'Guide has an exit handler for locked-in users');
+assert(html.includes('window.exitDiscoveryFlow = exitDiscoveryFlow'), 'Exit handler is exposed for inline buttons');
+assert(/function exitDiscoveryFlow\(\) \{[\s\S]*?if \(!identity\) return;[\s\S]*?showDashboard\(\);[\s\S]*?showView\('settings'\);/.test(html), 'Exit returns locked-in users to Config without changing identity');
 assert(html.includes('GUIDED_PROCESS'), 'Config includes a guided process option for users who already locked an identity');
 assert(html.includes('The guide will not change anything until you write and lock a new identity yourself.'), 'Config explains rerunning the guide is safe until the user locks a new identity');
 assert(/function startDiscoveryFlow\(\) \{[\s\S]*?hideAllScreens\(\);[\s\S]*?discoveryScreen'\)\.classList\.remove\('hidden'\)/.test(html), 'Guided process can launch directly from config, not only from the onboarding choice screen');
