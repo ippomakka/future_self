@@ -640,6 +640,9 @@
   }
   .choice-chip[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent-fg); border-color: var(--border); }
   .discovery-progress { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+  .discovery-question-list { margin: 16px 0 18px; padding-left: 18px; color: var(--fg); }
+  .discovery-question-list li { margin: 10px 0; }
+  .discovery-note { margin: 14px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
   .discovery-result { border-left: 2px solid var(--border); padding-left: 14px; margin: 18px 0; }
   .link-button { background: transparent; border: 0; color: var(--muted); font-family: inherit; font-size: 11px; text-decoration: underline; cursor: pointer; padding: 8px 0; }
 
@@ -693,8 +696,8 @@
   <h1>> Future_Self_Discovery</h1>
   <div class="ascii-box" id="discoveryChoicePanel">
     <p class="discovery-copy">
-      Do you already know your future self direction?<br>
-      You can write it directly, or use a quick guide to find the signal.
+      You are not here to be handed an identity.<br>
+      The guide only gives you questions to sit with. You still have to know it from inside yourself.
     </p>
     <div class="btn-row">
       <button class="btn" type="button" onclick="goToSetup()">I know what I want</button>
@@ -703,21 +706,25 @@
     <button class="link-button" type="button" onclick="goToSetup()">Skip guide for now</button>
   </div>
   <div class="ascii-box hidden" id="discoveryFlowPanel">
-    <div class="discovery-progress" id="discoveryProgress">Step 1/3</div>
+    <div class="discovery-progress" id="discoveryProgress">Step 1/6</div>
     <p class="discovery-copy" id="discoveryPrompt"></p>
-    <div class="choice-grid" id="discoveryOptions"></div>
+    <ul class="discovery-question-list" id="discoveryQuestions"></ul>
+    <p class="discovery-note" id="discoveryNote"></p>
     <div class="btn-row">
       <button class="btn secondary" type="button" id="discoveryBack" onclick="previousDiscoveryStep()">BACK</button>
       <button class="btn" type="button" id="discoveryNext" onclick="nextDiscoveryStep()">NEXT</button>
     </div>
   </div>
   <div class="ascii-box hidden" id="discoveryResultPanel">
-    <div class="discovery-progress">Starting_Direction</div>
-    <div class="discovery-result" id="discoveryResult"></div>
+    <div class="discovery-progress">Mental_Rehearsal</div>
+    <div class="discovery-result" id="discoveryResult">
+      <p>Close your eyes for a moment.</p>
+      <p>Think the thoughts of that future self. Choose the behaviours of that future self. Feel the emotions before the outer proof arrives.</p>
+      <p>When it feels clear enough, write your own identity. Do not copy the questions. Translate what you know into your words.</p>
+    </div>
     <div class="btn-row">
-      <button class="btn" type="button" onclick="saveDiscoveryIdentity()">SAVE_THIS</button>
-      <button class="btn secondary" type="button" onclick="editDiscoveryIdentity()">EDIT_DETAILS</button>
-      <button class="btn secondary" type="button" onclick="startDiscoveryFlow()">START_OVER</button>
+      <button class="btn" type="button" onclick="goToSetup()">WRITE_MY_IDENTITY</button>
+      <button class="btn secondary" type="button" onclick="startDiscoveryFlow()">REVIEW_QUESTIONS</button>
     </div>
   </div>
 </div>
@@ -856,8 +863,10 @@
       <p class="warn">WARNING: Editing your identity will reset your streak. The subconscious does not respond to constant changes.</p>
       <div class="user-pill" id="userPill">Signed in</div>
       <div id="editForm"></div>
+      <p class="discovery-note">Want to run the questions again? The guide will not change anything until you write and lock a new identity yourself.</p>
       <div class="btn-row" style="margin-top:8px;">
         <button class="btn" onclick="updateIdentity()">UPDATE_IDENTITY</button>
+        <button class="btn secondary" onclick="startDiscoveryFlow()">GUIDED_PROCESS</button>
         <button class="btn secondary" onclick="exportData()">EXPORT_DATA</button>
         <button class="btn secondary" onclick="signOut()">LOG_OUT</button>
       </div>
@@ -892,12 +901,67 @@
   let saveTimer = null;
   let historyMonthOffset = 0;
   let discoveryStep = 0;
-  let discoveryDraft = null;
-  const discoveryAnswers = { done: [], desired: [], physical: [] };
   const discoverySteps = [
-    { key: 'done', prompt: 'What feels heavy right now?', note: 'Choose up to 3 signals.', options: ['anxious','scattered','numb','insecure','overwhelmed','stuck','unmotivated','disconnected','behind','not enough'] },
-    { key: 'desired', prompt: 'What do you have instead?', note: 'Choose up to 3.', options: ['calm','clear','confident','focused','alive','free','worthy','disciplined','present','safe'] },
-    { key: 'physical', prompt: 'What physical shift would change things?', note: 'Choose up to 3.', options: ['more energy','better sleep','a stronger body','clearer skin','better posture','less tension','healthier eating','more stamina','confidence in my appearance','a cleaner environment','a body I trust','feeling attractive'] }
+    {
+      title: 'The anchor',
+      prompt: 'What is the greatest expression of myself I can imagine being?',
+      questions: [
+        'Do not answer as a goal. Let the image of the person form first.',
+        'What is the greatest ideal of myself I can be today?',
+        'What would it be like to be that version of me?'
+      ],
+      note: 'This is the frame everything else hangs off. The app will not generate it for you.'
+    },
+    {
+      title: 'Thoughts',
+      prompt: 'What thoughts would this future version of me think?',
+      questions: [
+        'What would their ordinary inner monologue sound like?',
+        'What thoughts would I have to stop thinking to stop rehearsing the old self?',
+        'Which thoughts would I practise until they feel familiar?'
+      ],
+      note: 'Notice the thoughts that keep the old identity in place. Then notice the thoughts that belong to the future self.'
+    },
+    {
+      title: 'Behaviours / choices',
+      prompt: 'How would this person act?',
+      questions: [
+        'What would they do differently in an ordinary day?',
+        'What choices would they make when nobody is watching?',
+        'What routines would become normal for them?'
+      ],
+      note: 'Stay specific. The future self is not an aesthetic. It is choices repeated.'
+    },
+    {
+      title: 'Emotions',
+      prompt: 'What would this person feel before the result arrives?',
+      questions: [
+        'What emotions would I have to start memorising?',
+        'What would it be like to be calm, certain, free, loving, disciplined, or whatever my state is?',
+        'Can I feel that now instead of waiting for life to give me permission?'
+      ],
+      note: 'This is the rehearsal: feeling the future as a present reality.'
+    },
+    {
+      title: 'Admiration',
+      prompt: 'Who do I admire, and what qualities do they embody?',
+      questions: [
+        'Which traits do I recognise in them?',
+        'What if those traits are also latent in me?',
+        'Which qualities am I ready to claim without copying their life?'
+      ],
+      note: 'If you can recognise the quality, you have some relationship to it already.'
+    },
+    {
+      title: 'Letting go',
+      prompt: 'What would I have to change about myself, or let go of, to become this person?',
+      questions: [
+        'Which habits, stories, reactions, and environments keep confirming the old self?',
+        'What would I stop choosing today?',
+        'What is the greatest ideal of myself I can be today?'
+      ],
+      note: 'Do not rush this into an answer. Let it make the blank setup form uncomfortable in the right way.'
+    }
   ];
 
   // ── ASCII Art ─────────────────────────────────────────────
@@ -1276,10 +1340,8 @@ ${gokuArt}
 
   function startDiscoveryFlow() {
     discoveryStep = 0;
-    discoveryDraft = null;
-    discoveryAnswers.done = [];
-    discoveryAnswers.desired = [];
-    discoveryAnswers.physical = [];
+    hideAllScreens();
+    document.getElementById('discoveryScreen').classList.remove('hidden');
     document.getElementById('discoveryChoicePanel').classList.add('hidden');
     document.getElementById('discoveryResultPanel').classList.add('hidden');
     document.getElementById('discoveryFlowPanel').classList.remove('hidden');
@@ -1288,27 +1350,12 @@ ${gokuArt}
 
   function renderDiscoveryStep() {
     const step = discoverySteps[discoveryStep];
-    document.getElementById('discoveryProgress').textContent = 'Step ' + (discoveryStep + 1) + '/3 · ' + step.note;
+    document.getElementById('discoveryProgress').textContent = 'Step ' + (discoveryStep + 1) + '/' + discoverySteps.length + ' · ' + step.title;
     document.getElementById('discoveryPrompt').textContent = step.prompt;
-    const selected = discoveryAnswers[step.key];
-    document.getElementById('discoveryOptions').innerHTML = step.options.map(option => {
-      const isSelected = selected.includes(option);
-      return `<button class="choice-chip" type="button" aria-pressed="${isSelected ? 'true' : 'false'}" onclick="toggleDiscoveryOption('${step.key}','${escapeHtml(option)}')">${escapeHtml(option)}</button>`;
-    }).join('');
+    document.getElementById('discoveryQuestions').innerHTML = step.questions.map(question => `<li>${escapeHtml(question)}</li>`).join('');
+    document.getElementById('discoveryNote').textContent = step.note;
     document.getElementById('discoveryBack').disabled = discoveryStep === 0;
-    document.getElementById('discoveryNext').textContent = discoveryStep === discoverySteps.length - 1 ? 'BUILD_DIRECTION' : 'NEXT';
-    document.getElementById('discoveryNext').disabled = selected.length === 0;
-  }
-
-  function toggleDiscoveryOption(key, option) {
-    const list = discoveryAnswers[key];
-    const index = list.indexOf(option);
-    if (index >= 0) {
-      list.splice(index, 1);
-    } else if (list.length < 3) {
-      list.push(option);
-    }
-    renderDiscoveryStep();
+    document.getElementById('discoveryNext').textContent = discoveryStep === discoverySteps.length - 1 ? 'MENTAL_REHEARSAL' : 'NEXT';
   }
 
   function previousDiscoveryStep() {
@@ -1324,71 +1371,8 @@ ${gokuArt}
       renderDiscoveryStep();
       return;
     }
-    discoveryDraft = buildDiscoveryIdentity();
-    renderDiscoveryResult();
-  }
-
-  function buildDiscoveryIdentity() {
-    const doneText = joinWords(discoveryAnswers.done);
-    const desiredText = joinWords(discoveryAnswers.desired);
-    const physicalText = joinWords(discoveryAnswers.physical);
-    const primaryDesired = discoveryAnswers.desired[0] || 'clear';
-    const primaryPhysical = discoveryAnswers.physical[0] || 'a body I trust';
-    return {
-      goals: [
-        `I am someone who feels ${desiredText}.`,
-        `I have the inner state of ${desiredText}.`,
-        `I am becoming the version of myself who chooses this direction daily.`
-      ],
-      feelings: [
-        `I feel ${desiredText} in my mind and body.`,
-        `I feel stable, resourced, and anchored in ${primaryDesired}.`,
-        `I feel ${primaryDesired}, present, and committed every morning and night.`
-      ],
-      materials: [
-        `I have ${physicalText}.`,
-        `I have daily habits that support ${primaryPhysical}.`
-      ],
-      materialFeelings: [
-        `I feel grounded in a body and life moving toward ${physicalText}.`,
-        `I feel proud because my physical reality supports who I am becoming.`
-      ],
-      discovery: {
-        done: [...discoveryAnswers.done],
-        desired: [...discoveryAnswers.desired],
-        physical: [...discoveryAnswers.physical]
-      },
-      lockedAt: new Date().toISOString()
-    };
-  }
-
-  function renderDiscoveryResult() {
-    const doneText = joinWords(discoveryAnswers.done);
-    const desiredText = joinWords(discoveryAnswers.desired);
-    const physicalText = joinWords(discoveryAnswers.physical);
     document.getElementById('discoveryFlowPanel').classList.add('hidden');
     document.getElementById('discoveryResultPanel').classList.remove('hidden');
-    document.getElementById('discoveryResult').innerHTML = `
-      <p>Your signal points toward <strong>${escapeHtml(desiredText)}</strong>.</p>
-      <p>You have the inner state of <strong>${escapeHtml(desiredText)}</strong>.</p>
-      <p>Physically, you have <strong>${escapeHtml(physicalText)}</strong>.</p>
-    `;
-  }
-
-  function reviewDiscoveryIdentity() {
-    identity = discoveryDraft || buildDiscoveryIdentity();
-    hideAllScreens();
-    document.getElementById('setupScreen').classList.remove('hidden');
-    document.getElementById('setupIntro').innerHTML = 'Review your generated direction.<br>Edit anything that feels off, then lock it in when it feels true enough.';
-    document.getElementById('setupForm').innerHTML = buildGoalInputs(true);
-  }
-
-  function saveDiscoveryIdentity() {
-    reviewDiscoveryIdentity();
-  }
-
-  function editDiscoveryIdentity() {
-    reviewDiscoveryIdentity();
   }
 
   // ── Navigation ────────────────────────────────────────────
@@ -1719,13 +1703,8 @@ ${gokuArt}
   window.showDiscoveryChoice = showDiscoveryChoice;
   window.startDiscoveryFlow = startDiscoveryFlow;
   window.renderDiscoveryStep = renderDiscoveryStep;
-  window.toggleDiscoveryOption = toggleDiscoveryOption;
   window.previousDiscoveryStep = previousDiscoveryStep;
   window.nextDiscoveryStep = nextDiscoveryStep;
-  window.buildDiscoveryIdentity = buildDiscoveryIdentity;
-  window.reviewDiscoveryIdentity = reviewDiscoveryIdentity;
-  window.saveDiscoveryIdentity = saveDiscoveryIdentity;
-  window.editDiscoveryIdentity = editDiscoveryIdentity;
   window.goToSetup = goToSetup;
   window.signUp = signUp;
   window.signIn = signIn;
