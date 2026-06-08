@@ -639,14 +639,10 @@
     touch-action: manipulation;
   }
   .choice-chip[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent-fg); border-color: var(--border); }
-  .discovery-input {
-    width: 100%;
-    min-height: 116px;
-    margin: 16px 0 8px;
-    resize: vertical;
-  }
-  .discovery-hint { margin: 0 0 12px; color: var(--muted); font-size: 11px; line-height: 1.6; }
   .discovery-progress { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+  .discovery-question-list { margin: 16px 0 18px; padding-left: 18px; color: var(--fg); }
+  .discovery-question-list li { margin: 10px 0; }
+  .discovery-note { margin: 14px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
   .discovery-result { border-left: 2px solid var(--border); padding-left: 14px; margin: 18px 0; }
   .link-button { background: transparent; border: 0; color: var(--muted); font-family: inherit; font-size: 11px; text-decoration: underline; cursor: pointer; padding: 8px 0; }
 
@@ -700,8 +696,8 @@
   <h1>> Future_Self_Discovery</h1>
   <div class="ascii-box" id="discoveryChoicePanel">
     <p class="discovery-copy">
-      Do you already know your future self direction?<br>
-      You can write it directly, or use a quick guide to find the signal.
+      You are not here to be handed an identity.<br>
+      The guide only gives you questions to sit with. You still have to know it from inside yourself.
     </p>
     <div class="btn-row">
       <button class="btn" type="button" onclick="goToSetup()">I know what I want</button>
@@ -710,23 +706,25 @@
     <button class="link-button" type="button" onclick="goToSetup()">Skip guide for now</button>
   </div>
   <div class="ascii-box hidden" id="discoveryFlowPanel">
-    <div class="discovery-progress" id="discoveryProgress">Step 1/3</div>
+    <div class="discovery-progress" id="discoveryProgress">Step 1/6</div>
     <p class="discovery-copy" id="discoveryPrompt"></p>
-    <textarea class="input discovery-input" id="discoveryInput" rows="5" oninput="updateDiscoveryAnswer(this.value)"></textarea>
-    <p class="discovery-hint" id="discoveryHint"></p>
-    <div class="choice-grid" id="discoveryOptions"></div>
+    <ul class="discovery-question-list" id="discoveryQuestions"></ul>
+    <p class="discovery-note" id="discoveryNote"></p>
     <div class="btn-row">
       <button class="btn secondary" type="button" id="discoveryBack" onclick="previousDiscoveryStep()">BACK</button>
       <button class="btn" type="button" id="discoveryNext" onclick="nextDiscoveryStep()">NEXT</button>
     </div>
   </div>
   <div class="ascii-box hidden" id="discoveryResultPanel">
-    <div class="discovery-progress">Starting_Direction</div>
-    <div class="discovery-result" id="discoveryResult"></div>
+    <div class="discovery-progress">Mental_Rehearsal</div>
+    <div class="discovery-result" id="discoveryResult">
+      <p>Close your eyes for a moment.</p>
+      <p>Think the thoughts of that future self. Choose the behaviours of that future self. Feel the emotions before the outer proof arrives.</p>
+      <p>When it feels clear enough, write your own identity. Do not copy the questions. Translate what you know into your words.</p>
+    </div>
     <div class="btn-row">
-      <button class="btn" type="button" onclick="saveDiscoveryIdentity()">SAVE_THIS</button>
-      <button class="btn secondary" type="button" onclick="editDiscoveryIdentity()">EDIT_DETAILS</button>
-      <button class="btn secondary" type="button" onclick="startDiscoveryFlow()">START_OVER</button>
+      <button class="btn" type="button" onclick="goToSetup()">WRITE_MY_IDENTITY</button>
+      <button class="btn secondary" type="button" onclick="startDiscoveryFlow()">REVIEW_QUESTIONS</button>
     </div>
   </div>
 </div>
@@ -901,50 +899,66 @@
   let saveTimer = null;
   let historyMonthOffset = 0;
   let discoveryStep = 0;
-  let discoveryDraft = null;
-  const discoveryAnswers = { identity: '', day: '', body: '', relationships: '', work: '', environment: '' };
   const discoverySteps = [
     {
-      key: 'identity',
-      prompt: 'If your future self was already real, what would be obviously true about you?',
-      note: 'Write the identity. Not a goal. A fact you are learning to rehearse.',
-      placeholder: 'Example: I am calm under pressure. I trust myself. I follow through without making it dramatic.',
-      suggestions: ['calm under pressure','self-trusting','disciplined without force','clear and present']
+      title: 'The anchor',
+      prompt: 'What is the greatest expression of myself I can imagine being?',
+      questions: [
+        'Do not answer as a goal. Let the image of the person form first.',
+        'What is the greatest ideal of myself I can be today?',
+        'What would it be like to be that version of me?'
+      ],
+      note: 'This is the frame everything else hangs off. The app will not generate it for you.'
     },
     {
-      key: 'day',
-      prompt: 'Walk through one normal day as that person. What do they do without negotiating?',
-      note: 'Keep it concrete. Morning, work, health, attention, night.',
-      placeholder: 'Example: I wake up without checking my phone. I train. I do focused work. I end the day proud.',
-      suggestions: ['phone-free mornings','deep work first','training daily','clean night routine']
+      title: 'Thoughts',
+      prompt: 'What thoughts would this future version of me think?',
+      questions: [
+        'What would their ordinary inner monologue sound like?',
+        'What thoughts would I have to stop thinking to stop rehearsing the old self?',
+        'Which thoughts would I practise until they feel familiar?'
+      ],
+      note: 'Notice the thoughts that keep the old identity in place. Then notice the thoughts that belong to the future self.'
     },
     {
-      key: 'body',
-      prompt: 'How does your future self feel in their body?',
-      note: 'Describe energy, posture, sleep, strength, nervous system, appearance.',
-      placeholder: 'Example: My body feels strong, light, rested, attractive, and safe to live in.',
-      suggestions: ['strong body','rested nervous system','clean energy','confident posture']
+      title: 'Behaviours / choices',
+      prompt: 'How would this person act?',
+      questions: [
+        'What would they do differently in an ordinary day?',
+        'What choices would they make when nobody is watching?',
+        'What routines would become normal for them?'
+      ],
+      note: 'Stay specific. The future self is not an aesthetic. It is choices repeated.'
     },
     {
-      key: 'relationships',
-      prompt: 'How do they relate to people?',
-      note: 'Include boundaries, love, honesty, confidence, who they stop performing for.',
-      placeholder: 'Example: I am honest, warm, boundaried, and no longer shrink to be accepted.',
-      suggestions: ['honest','warm','boundaried','not approval-seeking']
+      title: 'Emotions',
+      prompt: 'What would this person feel before the result arrives?',
+      questions: [
+        'What emotions would I have to start memorising?',
+        'What would it be like to be calm, certain, free, loving, disciplined, or whatever my state is?',
+        'Can I feel that now instead of waiting for life to give me permission?'
+      ],
+      note: 'This is the rehearsal: feeling the future as a present reality.'
     },
     {
-      key: 'work',
-      prompt: 'What kind of work and money reality does this version live in?',
-      note: 'Make it present-tense and grounded. What do they create, earn, choose, refuse?',
-      placeholder: 'Example: I create meaningful work, make clean money, and choose my days with freedom.',
-      suggestions: ['meaningful work','clean money','creative freedom','valuable output']
+      title: 'Admiration',
+      prompt: 'Who do I admire, and what qualities do they embody?',
+      questions: [
+        'Which traits do I recognise in them?',
+        'What if those traits are also latent in me?',
+        'Which qualities am I ready to claim without copying their life?'
+      ],
+      note: 'If you can recognise the quality, you have some relationship to it already.'
     },
     {
-      key: 'environment',
-      prompt: 'What does their physical world look and feel like?',
-      note: 'Room, clothes, food, tools, people, city, nature. What surrounds them?',
-      placeholder: 'Example: My space is simple and clean. My clothes fit. My food supports me. My environment feels peaceful.',
-      suggestions: ['clean space','supportive food','simple tools','peaceful environment']
+      title: 'Letting go',
+      prompt: 'What would I have to change about myself, or let go of, to become this person?',
+      questions: [
+        'Which habits, stories, reactions, and environments keep confirming the old self?',
+        'What would I stop choosing today?',
+        'What is the greatest ideal of myself I can be today?'
+      ],
+      note: 'Do not rush this into an answer. Let it make the blank setup form uncomfortable in the right way.'
     }
   ];
 
@@ -1324,8 +1338,6 @@ ${gokuArt}
 
   function startDiscoveryFlow() {
     discoveryStep = 0;
-    discoveryDraft = null;
-    Object.keys(discoveryAnswers).forEach(key => { discoveryAnswers[key] = ''; });
     document.getElementById('discoveryChoicePanel').classList.add('hidden');
     document.getElementById('discoveryResultPanel').classList.add('hidden');
     document.getElementById('discoveryFlowPanel').classList.remove('hidden');
@@ -1334,31 +1346,12 @@ ${gokuArt}
 
   function renderDiscoveryStep() {
     const step = discoverySteps[discoveryStep];
-    const answer = discoveryAnswers[step.key] || '';
-    document.getElementById('discoveryProgress').textContent = 'Step ' + (discoveryStep + 1) + '/' + discoverySteps.length;
+    document.getElementById('discoveryProgress').textContent = 'Step ' + (discoveryStep + 1) + '/' + discoverySteps.length + ' · ' + step.title;
     document.getElementById('discoveryPrompt').textContent = step.prompt;
-    document.getElementById('discoveryInput').value = answer;
-    document.getElementById('discoveryInput').placeholder = step.placeholder;
-    document.getElementById('discoveryHint').textContent = step.note;
-    document.getElementById('discoveryOptions').innerHTML = step.suggestions.map(option => {
-      return `<button class="choice-chip" type="button" onclick="addDiscoverySuggestion('${step.key}','${escapeHtml(option)}')">+ ${escapeHtml(option)}</button>`;
-    }).join('');
+    document.getElementById('discoveryQuestions').innerHTML = step.questions.map(question => `<li>${escapeHtml(question)}</li>`).join('');
+    document.getElementById('discoveryNote').textContent = step.note;
     document.getElementById('discoveryBack').disabled = discoveryStep === 0;
-    document.getElementById('discoveryNext').textContent = discoveryStep === discoverySteps.length - 1 ? 'BUILD_DIRECTION' : 'NEXT';
-    document.getElementById('discoveryNext').disabled = answer.trim().length < 8;
-  }
-
-  function updateDiscoveryAnswer(value) {
-    const step = discoverySteps[discoveryStep];
-    discoveryAnswers[step.key] = value;
-    document.getElementById('discoveryNext').disabled = value.trim().length < 8;
-  }
-
-  function addDiscoverySuggestion(key, option) {
-    const current = discoveryAnswers[key].trim();
-    discoveryAnswers[key] = current ? current + ', ' + option : option;
-    renderDiscoveryStep();
-    document.getElementById('discoveryInput').focus();
+    document.getElementById('discoveryNext').textContent = discoveryStep === discoverySteps.length - 1 ? 'MENTAL_REHEARSAL' : 'NEXT';
   }
 
   function previousDiscoveryStep() {
@@ -1374,96 +1367,8 @@ ${gokuArt}
       renderDiscoveryStep();
       return;
     }
-    discoveryDraft = buildDiscoveryIdentity();
-    renderDiscoveryResult();
-  }
-
-  function cleanSentence(value) {
-    return String(value || '').replace(/\s+/g, ' ').trim().replace(/[.!?]+$/, '');
-  }
-
-  function firstClause(value, fallback) {
-    const cleaned = cleanSentence(value);
-    if (!cleaned) return fallback;
-    return cleaned.split(/[.;\n]/).map(part => part.trim()).filter(Boolean)[0] || fallback;
-  }
-
-  function asPresentFact(value, fallback) {
-    const clause = firstClause(value, fallback);
-    if (/^(i|my)\b/i.test(clause)) return clause;
-    return 'I am ' + clause.charAt(0).toLowerCase() + clause.slice(1);
-  }
-
-  function asMaterialFact(value, fallback) {
-    const clause = firstClause(value, fallback);
-    if (/^(i|my)\b/i.test(clause)) return clause;
-    return 'I have ' + clause.charAt(0).toLowerCase() + clause.slice(1);
-  }
-
-  function buildDiscoveryIdentity() {
-    const identityText = cleanSentence(discoveryAnswers.identity);
-    const dayText = cleanSentence(discoveryAnswers.day);
-    const bodyText = cleanSentence(discoveryAnswers.body);
-    const relationshipText = cleanSentence(discoveryAnswers.relationships);
-    const workText = cleanSentence(discoveryAnswers.work);
-    const environmentText = cleanSentence(discoveryAnswers.environment);
-    return {
-      goals: [
-        asPresentFact(identityText, 'I am calm, clear, and self-trusting'),
-        asPresentFact(relationshipText, 'I am honest, warm, and boundaried with people'),
-        asPresentFact(workText, 'I create meaningful work and choose my life with freedom')
-      ],
-      feelings: [
-        `I feel the quiet certainty of ${firstClause(identityText, 'being calm, clear, and self-trusting')}.`,
-        `I feel safe being seen, honest, and connected in my relationships.`,
-        `I feel focused, valuable, and free in the work I choose every day.`
-      ],
-      materials: [
-        asMaterialFact(bodyText, 'I have a strong, rested body I trust'),
-        asMaterialFact(environmentText, 'I have a clean, peaceful environment that supports me')
-      ],
-      materialFeelings: [
-        `I feel at home in my body: ${firstClause(bodyText, 'strong, rested, and steady')}.`,
-        `I feel supported by my physical world: ${firstClause(environmentText, 'simple, clean, and peaceful')}.`
-      ],
-      discovery: {
-        identity: identityText,
-        day: dayText,
-        body: bodyText,
-        relationships: relationshipText,
-        work: workText,
-        environment: environmentText
-      },
-      lockedAt: new Date().toISOString()
-    };
-  }
-
-  function renderDiscoveryResult() {
-    discoveryDraft = discoveryDraft || buildDiscoveryIdentity();
     document.getElementById('discoveryFlowPanel').classList.add('hidden');
     document.getElementById('discoveryResultPanel').classList.remove('hidden');
-    document.getElementById('discoveryResult').innerHTML = `
-      <p><strong>Identity:</strong> ${escapeHtml(discoveryDraft.goals[0])}</p>
-      <p><strong>Body:</strong> ${escapeHtml(discoveryDraft.materials[0])}</p>
-      <p><strong>Work:</strong> ${escapeHtml(discoveryDraft.goals[2])}</p>
-      <p>This is just a starting draft. The next screen lets you edit every line before you lock it in.</p>
-    `;
-  }
-
-  function reviewDiscoveryIdentity() {
-    identity = discoveryDraft || buildDiscoveryIdentity();
-    hideAllScreens();
-    document.getElementById('setupScreen').classList.remove('hidden');
-    document.getElementById('setupIntro').innerHTML = 'Review your generated direction.<br>Edit anything that feels off, then lock it in when it feels true enough.';
-    document.getElementById('setupForm').innerHTML = buildGoalInputs(true);
-  }
-
-  function saveDiscoveryIdentity() {
-    reviewDiscoveryIdentity();
-  }
-
-  function editDiscoveryIdentity() {
-    reviewDiscoveryIdentity();
   }
 
   // ── Navigation ────────────────────────────────────────────
@@ -1794,14 +1699,8 @@ ${gokuArt}
   window.showDiscoveryChoice = showDiscoveryChoice;
   window.startDiscoveryFlow = startDiscoveryFlow;
   window.renderDiscoveryStep = renderDiscoveryStep;
-  window.updateDiscoveryAnswer = updateDiscoveryAnswer;
-  window.addDiscoverySuggestion = addDiscoverySuggestion;
   window.previousDiscoveryStep = previousDiscoveryStep;
   window.nextDiscoveryStep = nextDiscoveryStep;
-  window.buildDiscoveryIdentity = buildDiscoveryIdentity;
-  window.reviewDiscoveryIdentity = reviewDiscoveryIdentity;
-  window.saveDiscoveryIdentity = saveDiscoveryIdentity;
-  window.editDiscoveryIdentity = editDiscoveryIdentity;
   window.goToSetup = goToSetup;
   window.signUp = signUp;
   window.signIn = signIn;
