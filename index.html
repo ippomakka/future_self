@@ -863,8 +863,10 @@
       <p class="warn">WARNING: Editing your identity will reset your streak. The subconscious does not respond to constant changes.</p>
       <div class="user-pill" id="userPill">Signed in</div>
       <div id="editForm"></div>
+      <p class="discovery-note">Want to run the questions again? The guide will not change anything until you write and lock a new identity yourself.</p>
       <div class="btn-row" style="margin-top:8px;">
         <button class="btn" onclick="updateIdentity()">UPDATE_IDENTITY</button>
+        <button class="btn secondary" onclick="startDiscoveryFlow()">GUIDED_PROCESS</button>
         <button class="btn secondary" onclick="exportData()">EXPORT_DATA</button>
         <button class="btn secondary" onclick="signOut()">LOG_OUT</button>
       </div>
@@ -1338,6 +1340,8 @@ ${gokuArt}
 
   function startDiscoveryFlow() {
     discoveryStep = 0;
+    hideAllScreens();
+    document.getElementById('discoveryScreen').classList.remove('hidden');
     document.getElementById('discoveryChoicePanel').classList.add('hidden');
     document.getElementById('discoveryResultPanel').classList.add('hidden');
     document.getElementById('discoveryFlowPanel').classList.remove('hidden');

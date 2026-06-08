@@ -22,6 +22,9 @@ assert(html.includes('Mental_Rehearsal'), 'Guide ends with mental rehearsal rath
 assert(html.includes('Think the thoughts of that future self'), 'Mental rehearsal copy asks the user to rehearse thoughts');
 assert(html.includes('Feel the emotions before the outer proof arrives'), 'Mental rehearsal copy asks the user to feel emotions before results');
 assert(html.includes('WRITE_MY_IDENTITY'), 'Guide ultimately sends the user to write their own identity');
+assert(html.includes('GUIDED_PROCESS'), 'Config includes a guided process option for users who already locked an identity');
+assert(html.includes('The guide will not change anything until you write and lock a new identity yourself.'), 'Config explains rerunning the guide is safe until the user locks a new identity');
+assert(/function startDiscoveryFlow\(\) \{[\s\S]*?hideAllScreens\(\);[\s\S]*?discoveryScreen'\)\.classList\.remove\('hidden'\)/.test(html), 'Guided process can launch directly from config, not only from the onboarding choice screen');
 assert(!html.includes('textarea class="input discovery-input"'), 'Guided onboarding does not collect written answers inside the guide');
 assert(!html.includes('updateDiscoveryAnswer'), 'Guide does not store question answers');
 assert(!html.includes('addDiscoverySuggestion'), 'Guide does not offer answer chips or suggestions');
