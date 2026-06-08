@@ -643,6 +643,7 @@
   .discovery-question-list { margin: 16px 0 18px; padding-left: 18px; color: var(--fg); }
   .discovery-question-list li { margin: 10px 0; }
   .discovery-note { margin: 14px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+  .discovery-exit-link { margin-top: 12px; }
   .discovery-result { border-left: 2px solid var(--border); padding-left: 14px; margin: 18px 0; }
   .link-button { background: transparent; border: 0; color: var(--muted); font-family: inherit; font-size: 11px; text-decoration: underline; cursor: pointer; padding: 8px 0; }
 
@@ -710,8 +711,8 @@
     <p class="discovery-copy" id="discoveryPrompt"></p>
     <ul class="discovery-question-list" id="discoveryQuestions"></ul>
     <p class="discovery-note" id="discoveryNote"></p>
+    <button class="link-button discovery-exit-link hidden" type="button" id="discoveryExit" onclick="exitDiscoveryFlow()">Exit to config</button>
     <div class="btn-row">
-      <button class="btn secondary hidden" type="button" id="discoveryExit" onclick="exitDiscoveryFlow()">EXIT_TO_CONFIG</button>
       <button class="btn secondary" type="button" id="discoveryBack" onclick="previousDiscoveryStep()">BACK</button>
       <button class="btn" type="button" id="discoveryNext" onclick="nextDiscoveryStep()">NEXT</button>
     </div>
@@ -723,8 +724,8 @@
       <p>Think the thoughts of that future self. Choose the behaviours of that future self. Feel the emotions before the outer proof arrives.</p>
       <p>When it feels clear enough, write your own identity. Do not copy the questions. Translate what you know into your words.</p>
     </div>
+    <button class="link-button discovery-exit-link hidden" type="button" id="discoveryResultExit" onclick="exitDiscoveryFlow()">Exit to config</button>
     <div class="btn-row">
-      <button class="btn secondary hidden" type="button" id="discoveryResultExit" onclick="exitDiscoveryFlow()">EXIT_TO_CONFIG</button>
       <button class="btn" type="button" onclick="goToSetup()">WRITE_MY_IDENTITY</button>
       <button class="btn secondary" type="button" onclick="startDiscoveryFlow()">REVIEW_QUESTIONS</button>
     </div>

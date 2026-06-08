@@ -22,7 +22,9 @@ assert(html.includes('Mental_Rehearsal'), 'Guide ends with mental rehearsal rath
 assert(html.includes('Think the thoughts of that future self'), 'Mental rehearsal copy asks the user to rehearse thoughts');
 assert(html.includes('Feel the emotions before the outer proof arrives'), 'Mental rehearsal copy asks the user to feel emotions before results');
 assert(html.includes('WRITE_MY_IDENTITY'), 'Guide ultimately sends the user to write their own identity');
-assert(html.includes('EXIT_TO_CONFIG'), 'Locked-in users can exit the guided process back to Config');
+assert(html.includes('Exit to config'), 'Locked-in users can exit the guided process back to Config');
+assert(html.includes('link-button discovery-exit-link hidden'), 'Exit to Config is rendered as small text, not a large button');
+assert(!html.includes('>EXIT_TO_CONFIG</button>'), 'Exit to Config is not rendered as the large uppercase CTA copy');
 assert(html.includes('function exitDiscoveryFlow'), 'Guide has an exit handler for locked-in users');
 assert(html.includes('window.exitDiscoveryFlow = exitDiscoveryFlow'), 'Exit handler is exposed for inline buttons');
 assert(/function exitDiscoveryFlow\(\) \{[\s\S]*?if \(!identity\) return;[\s\S]*?showDashboard\(\);[\s\S]*?showView\('settings'\);/.test(html), 'Exit returns locked-in users to Config without changing identity');
